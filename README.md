@@ -26,24 +26,14 @@ pip install -r requirements.txt
 
 ### 3. Run the server:
 
-First, create a MySQL database with the following command:
+Install and start MongoDB Community Server, or create a free MongoDB Atlas database. A local `backend/.env` has been created for MongoDB Community Server; otherwise, in the `backend` directory, copy `.env.example` to `.env` and set these values:
 
 ```
-mysql -u root -p
-CREATE DATABASE quiz_app;
+MONGODB_URI=mongodb://localhost:27017/quiz_app
+JWT_SECRET=<a-long-random-secret>
 ```
 
-Then run the command in 'database.sql' in the 'backend' directory to create tables in the database. Read the 'database.sql' file for more details.
-
-In the 'backend' directory, create a .env file and add the following lines:
-
-```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=<password>
-DB_NAME=quiz_app
-DB_PORT=<your database port, default is 3306>
-```
+For MongoDB Atlas, use its connection string as `MONGODB_URI`. You may set `MONGODB_DB_NAME=quiz_app` if the URI does not include a database name. The application creates its collections and indexes on startup; no SQL setup is required.
 
 Then run the following command to start the backend server:
 
