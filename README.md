@@ -18,10 +18,10 @@ Install NodeJS on [https://nodejs.org/en/download/prebuilt-installer/current](ht
 npm install
 ```
 
-Install Python on [https://www.python.org/downloads/](https://www.python.org/downloads/). In the 'backend' directory, run the following command to install the required dependencies:
+In the 'backend' directory, run the following command to install the required dependencies:
 
 ```
-pip install -r requirements.txt
+npm install
 ```
 
 ### 3. Run the server:
@@ -38,7 +38,7 @@ For MongoDB Atlas, use its connection string as `MONGODB_URI`. You may set `MONG
 Then run the following command to start the backend server:
 
 ```
-python main.py
+npm run dev
 ```
 
 ### 4. Run the application:
