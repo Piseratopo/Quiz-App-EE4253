@@ -1,9 +1,10 @@
 import Header from './components/Header';
 import Quiz from './components/Quiz';
+import "./styles/common.scss"
 
 const App = () => {
    return (
-      <div className="bg-background text-primary min-h-screen">
+      <div>
          <Header />
          <Quiz />
       </div>

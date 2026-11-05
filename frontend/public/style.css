@@ -106,6 +106,12 @@
   --tw-contain-style:  ;
 }
 
+:root {
+  --primary-color: #D60808;
+  --secondary-color: #4BB400;
+  --action-color: #F59E0B;
+}
+
 /*
 ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com
 */
@@ -653,6 +659,15 @@ video {
 
 .h-full {
   height: 100%;
+}
+
+.h-8  { --h: 8px; }
+.h-16 { --h: 16px; }
+.h-24 { --h: 24px; }
+.h-28 { --h: 28px; }
+
+[class^="h-"] {
+  height: var(--h);
 }
 
 .min-h-\[12rem\] {

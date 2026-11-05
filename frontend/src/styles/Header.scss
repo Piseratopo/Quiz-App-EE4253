@@ -1,0 +1,16 @@
+header {
+   padding: 0.5rem;
+   color: var(--primary-color);
+   box-shadow: 0 2px 0 0 #e80069;
+
+   img {
+      height: 40px;
+      width: auto;
+   }
+
+   .logo-text {
+      font-size: 1.25rem;       // equivalent to text-xl
+      letter-spacing: -0.025em; // equivalent to tracking-tight
+      font-weight: 700;        // equivalent to font-bold
+   }
+}

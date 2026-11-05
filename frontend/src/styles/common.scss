@@ -1,0 +1,63 @@
+:root {
+   --primary-color: #D60808;
+   --secondary-color: #008eff;
+   --action-color: #F59E0B;
+}
+
+.btn-common {
+   padding: 0.25rem 0.75rem;
+   background-color: #ffffff;
+   color: var(--primary-color);
+   font-size: 0.875rem;
+   font-weight: 700;
+   border-radius: 0.25rem;
+   transition: background-color 0.2s ease, color 0.2s ease;
+   border: none;
+   cursor: pointer;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   text-decoration: none;
+   
+   // Required for positioning the animated bottom border
+   position: relative;
+   overflow: hidden;
+
+   // Animated bottom border pseudo-element
+   &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px; // Thickness of the bottom border
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+   }
+
+   &:hover {
+      // Primary color with 0.8 opacity (using SCSS rgba or CSS color-mix/hex notation)
+      background-color: rgba(214, 8, 8, 0.2); // Equivalent to --primary-color at 0.8 alpha
+
+      // Triggers the bottom border animation
+      &::after {
+         width: 100%;
+      }
+   }
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.text-action {
+  color: var(--action-color);
+}
+
+.text-white {
+  color: #ffffff;
+}
