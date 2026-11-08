@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "init-db": "node scripts/initDb.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

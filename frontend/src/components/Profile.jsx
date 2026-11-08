@@ -2,8 +2,24 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../configs/apiClient';
 import MultipleChoiceQuestion from './questions/MultipleChoiceQuestion';
-import SearchBar from './SearchBar';
 import Pagination from './Pagination';
+
+function SearchBar({ search, setPage, setSearch }) {
+   return (
+      <div className="mt-2 flex items-center border border-black/20 rounded-md">
+         <input
+            type="text"
+            placeholder="Tìm kiếm câu hỏi..."
+            className="w-full p-2 bg-transparent outline-none"
+            value={search}
+            onChange={(e) => {
+               setSearch(e.target.value);
+               setPage(1);
+            }}
+         />
+      </div>
+   );
+}
 
 async function handleGetUserQuestions(id, page, search, setUserQuestions) {
    const token = localStorage.getItem('token');
@@ -89,8 +105,7 @@ function Profile() {
 
    const fieldsetStyle =
       'pb-2 px-2 mb-2 rounded-md border border-1 border-primary';
-   const updateButtonStyle =
-      'p-2 mb-4 rounded-md bg-primary text-background border-l border-primary';
+   const updateButtonStyle = 'common-btn-nav mb-4';
 
    return (
       <div>

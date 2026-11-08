@@ -5,6 +5,7 @@ const cors = require('cors');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
+const { seedData } = require('./scripts/initDb');
 
 const app = express();
 const port = Number(process.env.PORT || 8000);
@@ -210,6 +211,124 @@ app.patch('/api/update-password', requireToken, async (req, res, next) => {
    } catch (error) { next(error); }
 });
 
+// ==========================================
+// LEARNING SYSTEM APIs (Topics, Chapters, Lessons)
+// ==========================================
+
+// 1. Get all active topics
+app.get('/api/topics', async (req, res, next) => {
+   try {
+      const filter = { isActive: { $ne: false } };
+      if (req.query.discipline) {
+         filter.discipline = req.query.discipline;
+      }
+      const topics = await db.collection('topics')
+         .find(filter)
+         .sort({ order: 1 })
+         .toArray();
+      return res.json(topics);
+   } catch (error) { next(error); }
+});
+
+// 2. Get topic by slug with its chapters and lessons summary
+app.get('/api/topics/:slug', async (req, res, next) => {
+   try {
+      const topic = await db.collection('topics').findOne({ slug: req.params.slug });
+      if (!topic) return res.status(404).json({ error: 'Topic not found' });
+
+      const chapters = await db.collection('chapters')
+         .find({ topicId: topic._id })
+         .sort({ order: 1 })
+         .toArray();
+
+      const chapterIds = chapters.map((c) => c._id);
+      const lessons = await db.collection('lessons')
+         .find({ chapterId: { $in: chapterIds } }, { projection: { sections: 0 } })
+         .sort({ order: 1 })
+         .toArray();
+
+      const chaptersWithLessons = chapters.map((chap) => ({
+         ...chap,
+         lessons: lessons.filter((l) => l.chapterId.equals(chap._id)),
+      }));
+
+      return res.json({ ...topic, chapters: chaptersWithLessons });
+   } catch (error) { next(error); }
+});
+
+// 3. Get lesson details (sanitized: solution is hidden from client)
+app.get('/api/lessons/:lessonId', async (req, res, next) => {
+   const lessonId = asObjectId(req.params.lessonId);
+   if (!lessonId) return res.status(400).json({ error: 'Invalid lesson id' });
+
+   try {
+      const lesson = await db.collection('lessons').findOne({ _id: lessonId });
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+
+      // Strip solutions from exercises before returning to client
+      const sanitizedSections = (lesson.sections || []).map((sec) => {
+         if (sec.type === 'exercise' && sec.exercise) {
+            const { solution, ...safeExercise } = sec.exercise;
+            return { ...sec, exercise: safeExercise };
+         }
+         return sec;
+      });
+
+      return res.json({ ...lesson, sections: sanitizedSections });
+   } catch (error) { next(error); }
+});
+
+// 4. Submit an exercise answer and receive grading & explanation
+app.post('/api/lessons/:lessonId/exercises/:sectionIndex/submit', requireToken, async (req, res, next) => {
+   const lessonId = asObjectId(req.params.lessonId);
+   const sectionIndex = Number(req.params.sectionIndex);
+   const { answer } = req.body || {};
+
+   if (!lessonId || !Number.isInteger(sectionIndex)) {
+      return res.status(400).json({ error: 'Invalid parameters' });
+   }
+
+   try {
+      const lesson = await db.collection('lessons').findOne({ _id: lessonId });
+      if (!lesson || !lesson.sections || !lesson.sections[sectionIndex]) {
+         return res.status(404).json({ error: 'Exercise section not found' });
+      }
+
+      const sec = lesson.sections[sectionIndex];
+      if (sec.type !== 'exercise' || !sec.exercise) {
+         return res.status(400).json({ error: 'Section is not an exercise' });
+      }
+
+      const { type, solution, explanation } = sec.exercise;
+      let isCorrect = false;
+
+      // Polymorphic grading based on exercise type
+      if (type === 'mcq_single') {
+         isCorrect = Boolean(solution && answer === solution.correctAnswer);
+      } else if (type === 'mcq_multiple') {
+         const expected = Array.isArray(solution?.correctAnswers) ? solution.correctAnswers.sort() : [];
+         const given = Array.isArray(answer) ? [...answer].sort() : [];
+         isCorrect = JSON.stringify(expected) === JSON.stringify(given);
+      } else if (type === 'fill_blank') {
+         if (typeof solution?.correctValue === 'number') {
+            const numAns = Number(answer);
+            const tolerance = solution.tolerance || 0.01;
+            isCorrect = !isNaN(numAns) && Math.abs(numAns - solution.correctValue) <= tolerance;
+         } else {
+            isCorrect = String(answer || '').trim().toLowerCase() === String(solution?.correctValue || '').trim().toLowerCase();
+         }
+      } else {
+         isCorrect = JSON.stringify(answer) === JSON.stringify(solution);
+      }
+
+      return res.json({
+         isCorrect,
+         explanation: explanation || '',
+         solution: solution || null,
+      });
+   } catch (error) { next(error); }
+});
+
 app.use((error, req, res, next) => {
    console.error(error);
    res.status(500).json({ error: 'Internal server error' });
@@ -221,7 +340,32 @@ async function start() {
       db.collection('users').createIndex({ username_normalized: 1 }, { unique: true }),
       db.collection('questions').createIndex({ created_by: 1, created_at: -1 }),
       db.collection('wrong_responses').createIndex({ user_id: 1, question_id: 1 }, { unique: true }),
+      // Learning System Collections & Indexes
+      db.collection('topics').createIndex({ slug: 1 }, { unique: true }),
+      db.collection('topics').createIndex({ isActive: 1, order: 1 }),
+      db.collection('topics').createIndex({ discipline: 1, order: 1 }),
+      db.collection('chapters').createIndex({ topicId: 1, order: 1 }),
+      db.collection('lessons').createIndex({ chapterId: 1, order: 1 }),
    ]);
+
+   // Ensure existing topics have discipline field populated
+   await Promise.all([
+      db.collection('topics').updateMany(
+         { slug: { $in: ['co-hoc-co-dien', 'dien-tu-hoc'] }, discipline: { $exists: false } },
+         { $set: { discipline: 'physics' } }
+      ),
+      db.collection('topics').updateMany(
+         { slug: 'dai-so-tuyen-tinh', discipline: { $exists: false } },
+         { $set: { discipline: 'maths' } }
+      ),
+   ]);
+
+   // Auto-seed if database is clean
+   const topicCount = await db.collection('topics').countDocuments();
+   if (topicCount === 0) {
+      await seedData(db);
+   }
+
    app.listen(port, () => console.log(`Backend listening on http://localhost:${port}`));
 }
 

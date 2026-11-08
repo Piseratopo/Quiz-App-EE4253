@@ -11,7 +11,7 @@ async function deleteQuestion(id, navigate) {
       });
 
       if (response.status === 200) {
-         navigate('/explore');
+         navigate('/profile');
       }
    } catch (error) {
       console.error('Error deleting question:', error);

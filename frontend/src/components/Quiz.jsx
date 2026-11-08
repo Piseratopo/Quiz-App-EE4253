@@ -1,12 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './Auth';
-import Create from './Create';
-import Explore from './Explore';
+import Home from './Home';
 import Landing from './Landing';
-import Practice from './Practice';
-import PracticeEnd from './practice/PracticeEnd';
-import PracticePlay from './practice/PracticePlay';
 import Profile from './Profile';
+import Topics from './Topics';
 import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
@@ -16,16 +13,13 @@ const PrivateRoute = ({ children }) => {
 
 function Quiz() {
    const privateRoutes = [
-      { path: '/explore', element: <Explore /> },
-      { path: '/create', element: <Create /> },
+      { path: '/home', element: <Home /> },
+      { path: '/topics', element: <Topics /> },
       { path: '/profile', element: <Profile /> },
-      { path: '/practice', element: <Practice /> },
-      { path: '/practice/play', element: <PracticePlay /> },
-      { path: '/practice/end', element: <PracticeEnd /> },
    ];
 
    return (
-      <main className="py-4 px-12">
+      <main>
          <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
@@ -36,6 +30,7 @@ function Quiz() {
                   element={<PrivateRoute>{route.element}</PrivateRoute>}
                />
             ))}
+            <Route path="*" element={<Navigate to="/" replace />} />
          </Routes>
       </main>
    );
