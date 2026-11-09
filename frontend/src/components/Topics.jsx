@@ -185,53 +185,64 @@ export default function Topics() {
                            </div>
 
                            <div className="topics-cards-grid">
-                              {discipline.topics.map((topic) => (
-                                 <article
-                                    key={topic._id || topic.slug}
-                                    className="topic-card-item"
-                                    onClick={() => handleSelectTopic(topic.slug, topic.title)}
-                                 >
-                                    {/* Thumbnail 4:3 Ratio */}
-                                    <div className="topic-card-thumbnail-wrap">
-                                       {topic.thumbnail ? (
-                                          <img
-                                             src={topic.thumbnail}
-                                             alt={topic.title}
-                                             className="topic-card-thumbnail"
-                                             loading="lazy"
-                                          />
-                                       ) : (
-                                          <div className="topic-card-thumbnail-fallback">
-                                             <span className="material-symbols-outlined">menu_book</span>
-                                          </div>
-                                       )}
-                                       <span className="topic-status-badge">
-                                          <span className="live-dot"></span>
-                                          Trực tuyến
-                                       </span>
-                                    </div>
+                              {discipline.topics.map((topic) => {
+                                 const isUpcoming = Boolean(
+                                    topic.isUpcoming ||
+                                    topic.status === 'upcoming' ||
+                                    topic.status === 'coming_soon' ||
+                                    topic.released === false ||
+                                    topic.isReleased === false
+                                 );
 
-                                    <div className="topic-card-body">
-                                       <h3 className="topic-card-title">{topic.title}</h3>
-                                       <p className="topic-card-desc">{topic.description}</p>
-                                    </div>
+                                 return (
+                                    <article
+                                       key={topic._id || topic.slug}
+                                       className={`topic-card-item ${isUpcoming ? 'topic-card-item--upcoming' : ''}`}
+                                       onClick={() => handleSelectTopic(topic.slug, topic.title)}
+                                    >
+                                       {/* Thumbnail 4:3 Ratio */}
+                                       <div className="topic-card-thumbnail-wrap">
+                                          {topic.thumbnail ? (
+                                             <img
+                                                src={topic.thumbnail}
+                                                alt={topic.title}
+                                                className="topic-card-thumbnail"
+                                                loading="lazy"
+                                             />
+                                          ) : (
+                                             <div className="topic-card-thumbnail-fallback">
+                                                <span className="material-symbols-outlined">menu_book</span>
+                                             </div>
+                                          )}
+                                          {isUpcoming && (
+                                             <span className="topic-upcoming-badge">
+                                                Sắp ra mắt
+                                             </span>
+                                          )}
+                                       </div>
 
-                                    <div className="topic-card-footer">
-                                       <span className="topic-card-meta">
-                                          <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
-                                             collections_bookmark
+                                       <div className="topic-card-body">
+                                          <h3 className="topic-card-title">{topic.title}</h3>
+                                          <p className="topic-card-desc">{topic.description}</p>
+                                       </div>
+
+                                       <div className="topic-card-footer">
+                                          <span className="topic-card-meta">
+                                             <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                                                collections_bookmark
+                                             </span>
+                                             {isUpcoming ? 'Đang biên soạn' : 'Khám phá bài học'}
                                           </span>
-                                          Khám phá bài học
-                                       </span>
-                                       <span className="topic-card-action">
-                                          <span>Khám phá</span>
-                                          <span className="material-symbols-outlined action-arrow">
-                                             arrow_forward
+                                          <span className="topic-card-action">
+                                             <span>{isUpcoming ? 'Xem trước' : 'Khám phá'}</span>
+                                             <span className="material-symbols-outlined action-arrow">
+                                                arrow_forward
+                                             </span>
                                           </span>
-                                       </span>
-                                    </div>
-                                 </article>
-                              ))}
+                                       </div>
+                                    </article>
+                                 );
+                              })}
                            </div>
                         </section>
                      ))
