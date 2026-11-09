@@ -200,7 +200,7 @@
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 1rem;
-  padding: 1.5rem;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -209,14 +209,12 @@
   position: relative;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     border-color: rgba(214, 8, 8, 0.3);
-    box-shadow: 0 10px 25px -5px rgba(214, 8, 8, 0.06);
+    box-shadow: 0 12px 28px -6px rgba(214, 8, 8, 0.1);
 
-    .topic-icon-box {
-      background-color: var(--primary-color);
-      color: #ffffff;
-      border-color: var(--primary-color);
+    .topic-card-thumbnail {
+      transform: scale(1.05);
     }
 
     .topic-card-title {
@@ -228,59 +226,61 @@
     }
   }
 
-  .topic-card-body {
-    .topic-card-badge-wrap {
+  // 4:3 Aspect Ratio Thumbnail Wrap
+  .topic-card-thumbnail-wrap {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.04);
+
+    .topic-card-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .topic-card-thumbnail-fallback {
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
+      justify-content: center;
+      color: rgba(0, 0, 0, 0.3);
+      font-size: 2.5rem;
+    }
 
-      .topic-icon-box {
-        width: 3rem;
-        height: 3rem;
-        border-radius: 0.75rem;
-        background-color: rgba(214, 8, 8, 0.08);
-        border: 1px solid rgba(214, 8, 8, 0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
-        transition: all 0.3s ease;
+    .topic-status-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: var(--color-text);
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 
-        .material-symbols-outlined {
-          font-size: 1.35rem;
-        }
-
-        .text-icon {
-          font-family: serif;
-          font-size: 1.4rem;
-          font-weight: 800;
-          font-style: italic;
-          line-height: 1;
-        }
-      }
-
-      .live-status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.65rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        background-color: rgba(0, 0, 0, 0.05);
-        color: rgba(0, 0, 0, 0.65);
-        padding: 0.2rem 0.5rem;
-        border-radius: 9999px;
-
-        .live-dot {
-          width: 0.4rem;
-          height: 0.4rem;
-          border-radius: 50%;
-          background-color: var(--primary-color);
-        }
+      .live-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background-color: var(--primary-color);
       }
     }
+  }
+
+  .topic-card-body {
+    padding: 1.25rem 1.5rem 1rem 1.5rem;
+    flex: 1;
 
     .topic-card-title {
       font-size: 1.25rem;
@@ -295,15 +295,15 @@
       font-size: 0.875rem;
       color: rgba(0, 0, 0, 0.65);
       line-height: 1.6;
-      margin: 0 0 1.25rem 0;
+      margin: 0;
     }
   }
 
   .topic-card-footer {
+    padding: 0.875rem 1.5rem 1.25rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 1rem;
     border-top: 1px solid rgba(0, 0, 0, 0.06);
 
     .topic-card-meta {

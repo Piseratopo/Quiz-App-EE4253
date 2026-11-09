@@ -348,17 +348,118 @@ async function start() {
       db.collection('lessons').createIndex({ chapterId: 1, order: 1 }),
    ]);
 
-   // Ensure existing topics have discipline field populated
-   await Promise.all([
-      db.collection('topics').updateMany(
-         { slug: { $in: ['co-hoc-co-dien', 'dien-tu-hoc'] }, discipline: { $exists: false } },
-         { $set: { discipline: 'physics' } }
-      ),
-      db.collection('topics').updateMany(
-         { slug: 'dai-so-tuyen-tinh', discipline: { $exists: false } },
-         { $set: { discipline: 'maths' } }
-      ),
-   ]);
+   // Ensure existing topics have discipline and thumbnail populated
+   await db.collection('topics').updateOne(
+      { slug: 'co-hoc-co-dien' },
+      {
+         $set: {
+            thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/v1794192698/classical_mechanics_iddoha.png',
+            discipline: 'physics',
+            isActive: true,
+         },
+      }
+   );
+
+   // Ensure Nhiệt động lực học exists with thumbnail
+   const thermoExists = await db.collection('topics').findOne({ slug: 'nhiet-dong-luc-hoc' });
+   if (!thermoExists) {
+      const thermoId = new ObjectId();
+      await db.collection('topics').insertOne({
+         _id: thermoId,
+         title: 'Nhiệt động lực học',
+         slug: 'nhiet-dong-luc-hoc',
+         description: 'Các nguyên lý bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
+         discipline: 'physics',
+         thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
+         order: 2,
+         isActive: true,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+
+      const chapThermoId = new ObjectId();
+      await db.collection('chapters').insertOne({
+         _id: chapThermoId,
+         topicId: thermoId,
+         name: 'Nguyên lý I Nhiệt động lực học',
+         description: 'Độ biến thiên nội năng, công và nhiệt lượng trong các đẳng quá trình.',
+         order: 1,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+
+      await db.collection('lessons').insertOne({
+         _id: new ObjectId(),
+         chapterId: chapThermoId,
+         title: 'Nội năng, Nhiệt lượng và Công',
+         description: 'Hệ thức của Nguyên lý I: dU = dA + dQ và ứng dụng tính công chất khí.',
+         order: 1,
+         sections: [
+            {
+               title: 'I. Lý thuyết Nguyên lý I',
+               order: 1,
+               type: 'doc',
+               docContent: {
+                  format: 'markdown',
+                  body: `### 1. Phát biểu Nguyên lý I
+Độ biến thiên nội năng $\\Delta U$ của hệ bằng tổng công $A$ và nhiệt lượng $Q$ mà hệ nhận được:
+$$\\Delta U = A + Q$$
+
+### 2. Quy ước dấu
+- $Q > 0$: Hệ **nhận** nhiệt lượng; $Q < 0$: Hệ **truyền** nhiệt lượng.
+- $A > 0$: Hệ **nhận** công; $A < 0$: Hệ **sinh** công ($A' = -A > 0$).
+
+### 3. Áp dụng cho các đẳng quá trình
+- **Đẳng tích ($V = \\text{const}$):** Khí không sinh công ($A = 0$), do đó $\\Delta U = Q$.
+- **Đẳng nhiệt ($T = \\text{const}$):** Đối với khí lý tưởng, nội năng không đổi ($\\Delta U = 0$), do đó $Q = -A = A'$ (nhiệt lượng nhận vào chuyển hết thành công sinh ra).
+`,
+                  attachments: [],
+               },
+            },
+            {
+               title: 'II. Bài tập trắc nghiệm',
+               order: 2,
+               type: 'exercise',
+               exercise: {
+                  type: 'mcq_single',
+                  question: 'Một khối khí lý tưởng nhận nhiệt lượng $Q = 100\\text{ J}$ từ nguồn nóng và đồng thời thực hiện một công $A\' = 40\\text{ J}$ lên môi trường. Độ biến thiên nội năng $\\Delta U$ của khối khí là:',
+                  mediaList: [],
+                  payload: {
+                     options: [
+                        { id: 'ans_1', label: '$\\Delta U = 60\\text{ J}$' },
+                        { id: 'ans_2', label: '$\\Delta U = 140\\text{ J}$' },
+                        { id: 'ans_3', label: '$\\Delta U = -60\\text{ J}$' },
+                        { id: 'ans_4', label: '$\\Delta U = 40\\text{ J}$' },
+                     ],
+                  },
+                  solution: {
+                     correctAnswer: 'ans_1',
+                  },
+                  explanation: 'Hệ nhận nhiệt lượng nên $Q = +100\\text{ J}$.\nHệ sinh công $A\' = 40\\text{ J}$, nghĩa là công hệ nhận vào là $A = -A\' = -40\\text{ J}$.\nÁp dụng Nguyên lý I:\n$$\\Delta U = A + Q = -40 + 100 = 60\\text{ J}$$',
+               },
+            },
+         ],
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+   } else {
+      await db.collection('topics').updateOne(
+         { slug: 'nhiet-dong-luc-hoc' },
+         {
+            $set: {
+               thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
+               discipline: 'physics',
+               isActive: true,
+            },
+         }
+      );
+   }
+
+   // Ẩn các môn/chủ đề hiện chưa làm (chưa có thumbnail)
+   await db.collection('topics').updateMany(
+      { slug: { $nin: ['co-hoc-co-dien', 'nhiet-dong-luc-hoc'] } },
+      { $set: { isActive: false } }
+   );
 
    // Auto-seed if database is clean
    const topicCount = await db.collection('topics').countDocuments();

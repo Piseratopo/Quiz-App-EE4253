@@ -3,134 +3,16 @@ import apiClient from '../configs/apiClient';
 import LatexMarkdown from './common/LatexMarkdown';
 import '../styles/Topics.scss';
 
-const CATALOG_DISCIPLINES = [
-   {
-      id: 'physics',
+const DISCIPLINE_META = {
+   physics: {
       name: 'Vật lí',
       description: 'Nghiên cứu các quy luật vận động của vật chất, không thời gian và năng lượng vũ trụ.',
-      topics: [
-         {
-            slug: 'co-hoc-co-dien',
-            title: 'Cơ học cổ điển',
-            description: 'Nghiên cứu về chuyển động của các vật thể và các định luật Newton nền tảng trong vật lý học.',
-            icon: 'science',
-            stats: '14 bài học • 42 mô phỏng',
-         },
-         {
-            slug: 'dien-tu-hoc',
-            title: 'Điện từ học',
-            description: 'Khảo sát điện trường, từ trường và sự tương tác cơ bản giữa các điện tích.',
-            icon: 'bolt',
-            stats: '18 bài học • 36 mô phỏng',
-         },
-         {
-            slug: 'quang-hoc-song',
-            title: 'Quang học & Sóng',
-            description: 'Bản chất sóng-hạt của ánh sáng, hiện tượng giao thoa, nhiễu xạ và nguyên lý truyền thông lượng tử.',
-            icon: 'water',
-            stats: '12 bài học • 28 mô phỏng',
-         },
-         {
-            slug: 'nhiet-dong-luc-hoc',
-            title: 'Nhiệt động lực học',
-            description: 'Các nguyên lý bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
-            icon: 'local_fire_department',
-            stats: '10 bài học • 24 mô phỏng',
-         },
-         {
-            slug: 'vat-ly-thien-van',
-            title: 'Vật lý Thiên văn & Vũ trụ học',
-            description: 'Trọng trường Einstein, lỗ đen, sự giãn nở không-thời gian và mô hình tiến hóa sao lớn.',
-            icon: 'satellite_alt',
-            stats: '16 bài học • 30 mô phỏng',
-         },
-         {
-            slug: 'vat-ly-luong-tu',
-            title: 'Vật lý Lượng tử cơ bản',
-            description: 'Phương trình Schrödinger, hàm sóng, nghịch lý EPR và nguyên lý bất định Heisenberg.',
-            icon: 'grain',
-            stats: '15 bài học • 35 mô phỏng',
-         },
-      ],
    },
-   {
-      id: 'math',
+   maths: {
       name: 'Toán học',
       description: 'Ngôn ngữ tư duy định lượng mô tả chính xác bản chất tự nhiên và tính toán mô hình.',
-      topics: [
-         {
-            slug: 'dai-so-tuyen-tinh',
-            title: 'Đại số tuyến tính',
-            description: 'Không gian vectơ, phép toán ma trận, định thức và các phép biến đổi tuyến tính trong toán học.',
-            textIcon: 'Σ',
-            stats: '16 bài học • 48 mô phỏng',
-         },
-         {
-            slug: 'giai-tich-vi-phan',
-            title: 'Giải tích & Vi phân',
-            description: 'Giới hạn hàm số, đạo hàm đa biến, tích phân đường mặt và phương trình vi phân ứng dụng.',
-            textIcon: '∫dx',
-            stats: '20 bài học • 55 mô phỏng',
-         },
-         {
-            slug: 'xac-suat-thong-ke',
-            title: 'Xác suất & Thống kê',
-            description: 'Biến ngẫu nhiên, các phân phối chuẩn/Poisson, kiểm định giả thuyết và thống kê suy luận Bayes.',
-            icon: 'query_stats',
-            stats: '14 bài học • 32 mô phỏng',
-         },
-         {
-            slug: 'toan-roi-rac-do-thi',
-            title: 'Toán rời rạc & Đồ thị',
-            description: 'Tổ hợp, quan hệ đồng dư, cấu trúc cây, đường đi ngắn nhất và bài toán đồ thị phẳng.',
-            icon: 'hub',
-            stats: '11 bài học • 29 mô phỏng',
-         },
-      ],
    },
-   {
-      id: 'cs',
-      name: 'Khoa học Máy tính & Dữ liệu',
-      description: 'Nền tảng thuật toán, logic máy tính và mô hình trí tuệ nhân tạo hiện đại.',
-      topics: [
-         {
-            slug: 'thuat-toan-ctdl',
-            title: 'Thuật toán & Cấu trúc dữ liệu',
-            description: 'Trực quan hóa độ phức tạp thời gian Big-O, sắp xếp, tìm kiếm nhị phân, quy hoạch động và heap.',
-            icon: 'alt_route',
-            stats: '19 bài học • 50 mô phỏng',
-         },
-         {
-            slug: 'hoc-may-mang-no-ron',
-            title: 'Học máy & Mạng nơ-ron',
-            description: 'Lan truyền ngược (Backpropagation), hàm mất mát gradient descent và kiến trúc Transformer cơ bản.',
-            icon: 'psychology',
-            stats: '15 bài học • 38 mô phỏng',
-         },
-      ],
-   },
-   {
-      id: 'chem',
-      name: 'Hóa học & Cấu trúc Phân tử',
-      description: 'Mô hình liên kết electron, phản ứng động học và vật liệu nano lượng tử.',
-      topics: [
-         {
-            slug: 'lien-ket-hoa-hoc',
-            title: 'Liên kết Hóa học & Cấu trúc',
-            description: 'Mô hình lai hóa orbital VSEPR, liên kết cộng hóa trị, liên kết ion và lực tương tác Van der Waals 3D.',
-            icon: 'bubble_chart',
-            stats: '13 bài học • 31 mô phỏng',
-         },
-         {
-            slug: 'dong-hoc-phan-ung',
-            title: 'Động học Phản ứng & Nhiệt hóa',
-            description: 'Tốc độ phản ứng, năng lượng hoạt hóa Arrhenius, trạng thái cân bằng Le Chatelier và xúc tác.',
-            icon: 'biotech',
-            stats: '9 bài học • 21 mô phỏng',
-         },
-      ],
-   },
-];
+};
 
 export default function Topics() {
    const [dbTopics, setDbTopics] = useState([]);
@@ -149,7 +31,7 @@ export default function Topics() {
    const [exerciseResults, setExerciseResults] = useState({});
    const [submittingSection, setSubmittingSection] = useState(null);
 
-   // 1. Tải danh sách topic thực tế từ Database
+   // Tải danh sách topic thực tế từ Database
    useEffect(() => {
       loadDbTopics();
    }, []);
@@ -167,7 +49,7 @@ export default function Topics() {
       }
    };
 
-   // 3. Chọn chủ đề và tải các chương / bài học
+   // Chọn chủ đề và tải các chương / bài học
    const handleSelectTopic = async (slug, fallbackTitle) => {
       setLoadingTopic(true);
       setError('');
@@ -178,7 +60,6 @@ export default function Topics() {
             setExpandedChapters({ [response.data.chapters[0]._id]: true });
          }
       } catch (err) {
-         // Nếu chủ đề đang chuẩn bị nội dung
          setSelectedTopic({
             title: fallbackTitle || 'Chủ đề tương tác',
             slug,
@@ -197,7 +78,7 @@ export default function Topics() {
       }));
    };
 
-   // 4. Mở bài học
+   // Mở bài học
    const handleOpenLesson = async (lessonId) => {
       setLoadingLesson(true);
       setUserAnswers({});
@@ -212,7 +93,7 @@ export default function Topics() {
       }
    };
 
-   // 5. Nộp bài tập
+   // Nộp bài tập
    const handleSubmitExercise = async (sectionIndex) => {
       if (!activeLesson) return;
       const answer = userAnswers[sectionIndex];
@@ -238,8 +119,20 @@ export default function Topics() {
       }
    };
 
-   // Map db topics to catalog topics
-   const isTopicInDb = (slug) => dbTopics.some((t) => t.slug === slug);
+   // Gom nhóm chủ đề theo bộ môn thực tế từ backend
+   const disciplines = Object.entries(
+      dbTopics.reduce((acc, topic) => {
+         const disc = topic.discipline || 'physics';
+         if (!acc[disc]) acc[disc] = [];
+         acc[disc].push(topic);
+         return acc;
+      }, {})
+   ).map(([id, topics]) => ({
+      id,
+      name: DISCIPLINE_META[id]?.name || (id === 'physics' ? 'Vật lí' : id),
+      description: DISCIPLINE_META[id]?.description || '',
+      topics,
+   }));
 
    return (
       <div className="scisolve-catalog-page">
@@ -250,7 +143,9 @@ export default function Topics() {
                   <h1 className="catalog-hero-title">
                      Danh mục chủ đề
                   </h1>
-
+                  <p className="catalog-hero-desc">
+                     Tiếp cận khoa học từ nguyên lý gốc thông qua các mô phỏng tương tác sinh động, trực quan hóa công thức và thử nghiệm không giới hạn.
+                  </p>
                </div>
             </section>
          )}
@@ -266,43 +161,57 @@ export default function Topics() {
 
             {!selectedTopic ? (
                <div className="catalog-sections-wrap">
-                  {CATALOG_DISCIPLINES.map((discipline) => (
-                     <section key={discipline.id} className="discipline-group-section" id={`topics-${discipline.id}`}>
-                        <div className="discipline-group-header">
-                           <h2 className="discipline-group-title heading-accent-line">
-                              {discipline.name}
-                           </h2>
-                           <p className="discipline-group-desc">{discipline.description}</p>
-                        </div>
+                  {loading ? (
+                     <div className="catalog-loading-state">
+                        <span className="material-symbols-outlined spin-icon">progress_activity</span>
+                        <p>Đang tải danh mục chủ đề...</p>
+                     </div>
+                  ) : disciplines.length === 0 ? (
+                     <div className="catalog-empty-state">
+                        <span className="material-symbols-outlined empty-icon">folder_off</span>
+                        <h3>Chưa có chủ đề nào được kích hoạt</h3>
+                        <p>Các môn học đang được chuẩn bị nội dung và sẽ sớm ra mắt.</p>
+                     </div>
+                  ) : (
+                     disciplines.map((discipline) => (
+                        <section key={discipline.id} className="discipline-group-section" id={`topics-${discipline.id}`}>
+                           <div className="discipline-group-header">
+                              <h2 className="discipline-group-title heading-accent-line">
+                                 {discipline.name}
+                              </h2>
+                              {discipline.description && (
+                                 <p className="discipline-group-desc">{discipline.description}</p>
+                              )}
+                           </div>
 
-                        <div className="topics-cards-grid">
-                           {discipline.topics.map((topic) => {
-                              const inDb = isTopicInDb(topic.slug);
-                              return (
+                           <div className="topics-cards-grid">
+                              {discipline.topics.map((topic) => (
                                  <article
-                                    key={topic.slug}
+                                    key={topic._id || topic.slug}
                                     className="topic-card-item"
                                     onClick={() => handleSelectTopic(topic.slug, topic.title)}
                                  >
-                                    <div className="topic-card-body">
-                                       <div className="topic-card-badge-wrap">
-                                          <div className="topic-icon-box">
-                                             {topic.textIcon ? (
-                                                <span className="text-icon">{topic.textIcon}</span>
-                                             ) : (
-                                                <span className="material-symbols-outlined">
-                                                   {topic.icon || 'science'}
-                                                </span>
-                                             )}
+                                    {/* Thumbnail 4:3 Ratio */}
+                                    <div className="topic-card-thumbnail-wrap">
+                                       {topic.thumbnail ? (
+                                          <img
+                                             src={topic.thumbnail}
+                                             alt={topic.title}
+                                             className="topic-card-thumbnail"
+                                             loading="lazy"
+                                          />
+                                       ) : (
+                                          <div className="topic-card-thumbnail-fallback">
+                                             <span className="material-symbols-outlined">menu_book</span>
                                           </div>
-                                          {inDb && (
-                                             <span className="live-status-pill">
-                                                <span className="live-dot"></span>
-                                                Trực tuyến
-                                             </span>
-                                          )}
-                                       </div>
+                                       )}
+                                       <span className="topic-status-badge">
+                                          <span className="live-dot"></span>
+                                          Trực tuyến
+                                       </span>
+                                    </div>
 
+                                    <div className="topic-card-body">
                                        <h3 className="topic-card-title">{topic.title}</h3>
                                        <p className="topic-card-desc">{topic.description}</p>
                                     </div>
@@ -312,7 +221,7 @@ export default function Topics() {
                                           <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
                                              collections_bookmark
                                           </span>
-                                          {topic.stats}
+                                          Khám phá bài học
                                        </span>
                                        <span className="topic-card-action">
                                           <span>Khám phá</span>
@@ -322,11 +231,11 @@ export default function Topics() {
                                        </span>
                                     </div>
                                  </article>
-                              );
-                           })}
-                        </div>
-                     </section>
-                  ))}
+                              ))}
+                           </div>
+                        </section>
+                     ))
+                  )}
                </div>
             ) : (
                /* Topic Detail View: Chapters & Lessons */

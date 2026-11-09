@@ -17,6 +17,7 @@ async function seedData(db) {
       slug: 'co-hoc-co-dien',
       description: 'Nghiên cứu về chuyển động của các vật thể và các định luật Newton nền tảng trong vật lý học.',
       discipline: 'physics',
+      thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/v1794192698/classical_mechanics_iddoha.png',
       order: 1,
       isActive: true,
       createdAt: new Date(),
@@ -211,15 +212,16 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
    });
 
    // -------------------------------------------------------------
-   // TOPIC 2: Điện từ học
+   // TOPIC 2: Nhiệt động lực học
    // -------------------------------------------------------------
    const topic2Id = new ObjectId();
    await db.collection('topics').insertOne({
       _id: topic2Id,
-      title: 'Điện từ học',
-      slug: 'dien-tu-hoc',
-      description: 'Khảo sát điện trường, từ trường và sự tương tác cơ bản giữa các điện tích.',
+      title: 'Nhiệt động lực học',
+      slug: 'nhiet-dong-luc-hoc',
+      description: 'Các nguyên lý bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
       discipline: 'physics',
+      thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
       order: 2,
       isActive: true,
       createdAt: new Date(),
@@ -230,8 +232,8 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
    await db.collection('chapters').insertOne({
       _id: chap2_1Id,
       topicId: topic2Id,
-      name: 'Điện trường & Định luật Coulomb',
-      description: 'Tương tác tĩnh điện giữa các điện tích điểm và khái niệm điện trường.',
+      name: 'Nguyên lý I Nhiệt động lực học',
+      description: 'Độ biến thiên nội năng, công và nhiệt lượng trong các đẳng quá trình.',
       order: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -240,24 +242,27 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
    await db.collection('lessons').insertOne({
       _id: new ObjectId(),
       chapterId: chap2_1Id,
-      title: 'Định luật Coulomb và Cường độ điện trường',
-      description: 'Lực tương tác giữa hai điện tích điểm đặt trong chân không.',
+      title: 'Nội năng, Nhiệt lượng và Công',
+      description: 'Hệ thức của Nguyên lý I: dU = dA + dQ và ứng dụng tính công chất khí.',
       order: 1,
       sections: [
          {
-            title: 'I. Định luật Coulomb',
+            title: 'I. Lý thuyết Nguyên lý I',
             order: 1,
             type: 'doc',
             docContent: {
                format: 'markdown',
-               body: `### 1. Định luật Coulomb
-Lực tương tác tĩnh điện giữa hai điện tích điểm $q_1$ và $q_2$ đặt cách nhau một khoảng $r$ trong chân không có độ lớn:
-$$F = k \\cdot \\frac{|q_1 q_2|}{r^2}$$
-Trong đó hằng số tĩnh điện $k = \\frac{1}{4\\pi \\varepsilon_0} \\approx 8.99 \\times 10^9 \\text{ N}\\cdot\\text{m}^2/\\text{C}^2$.
+               body: `### 1. Phát biểu Nguyên lý I
+Độ biến thiên nội năng $\\Delta U$ của hệ bằng tổng công $A$ và nhiệt lượng $Q$ mà hệ nhận được:
+$$\\Delta U = A + Q$$
 
-### 2. Cường độ điện trường
-Cường độ điện trường $\\vec{E}$ do một điện tích điểm $Q$ sinh ra tại điểm cách nó một khoảng $r$:
-$$E = k \\cdot \\frac{|Q|}{r^2}$$
+### 2. Quy ước dấu
+- $Q > 0$: Hệ **nhận** nhiệt lượng; $Q < 0$: Hệ **truyền** nhiệt lượng.
+- $A > 0$: Hệ **nhận** công; $A < 0$: Hệ **sinh** công ($A' = -A > 0$).
+
+### 3. Áp dụng cho các đẳng quá trình
+- **Đẳng tích ($V = \\text{const}$):** Khí không sinh công ($A = 0$), do đó $\\Delta U = Q$.
+- **Đẳng nhiệt ($T = \\text{const}$):** Đối với khí lý tưởng, nội năng không đổi ($\\Delta U = 0$), do đó $Q = -A = A'$ (nhiệt lượng nhận vào chuyển hết thành công sinh ra).
 `,
                attachments: [],
             },
@@ -268,20 +273,20 @@ $$E = k \\cdot \\frac{|Q|}{r^2}$$
             type: 'exercise',
             exercise: {
                type: 'mcq_single',
-               question: 'Nếu khoảng cách giữa hai điện tích điểm giảm đi 3 lần thì lực tương tác tĩnh điện Coulomb giữa chúng thay đổi như thế nào?',
+               question: 'Một khối khí lý tưởng nhận nhiệt lượng $Q = 100\\text{ J}$ từ nguồn nóng và đồng thời thực hiện một công $A\' = 40\\text{ J}$ lên môi trường. Độ biến thiên nội năng $\\Delta U$ của khối khí là:',
                mediaList: [],
                payload: {
                   options: [
-                     { id: 'ans_1', label: 'Tăng lên 9 lần' },
-                     { id: 'ans_2', label: 'Tăng lên 3 lần' },
-                     { id: 'ans_3', label: 'Giảm đi 9 lần' },
-                     { id: 'ans_4', label: 'Không thay đổi' },
+                     { id: 'ans_1', label: '$\\Delta U = 60\\text{ J}$' },
+                     { id: 'ans_2', label: '$\\Delta U = 140\\text{ J}$' },
+                     { id: 'ans_3', label: '$\\Delta U = -60\\text{ J}$' },
+                     { id: 'ans_4', label: '$\\Delta U = 40\\text{ J}$' },
                   ],
                },
                solution: {
                   correctAnswer: 'ans_1',
                },
-               explanation: 'Lực Coulomb tỉ lệ nghịch với bình phương khoảng cách: $F \\propto \\frac{1}{r^2}$. Khi khoảng cách $r$ giảm 3 lần ($r\' = \\frac{r}{3}$) thì $F\' = \\frac{F}{(1/3)^2} = 9F$. Do đó lực tăng 9 lần.',
+               explanation: 'Hệ nhận nhiệt lượng nên $Q = +100\\text{ J}$.\nHệ sinh công $A\' = 40\\text{ J}$, nghĩa là công hệ nhận vào là $A = -A\' = -40\\text{ J}$.\nÁp dụng Nguyên lý I:\n$$\\Delta U = A + Q = -40 + 100 = 60\\text{ J}$$',
             },
          },
       ],
@@ -290,17 +295,33 @@ $$E = k \\cdot \\frac{|Q|}{r^2}$$
    });
 
    // -------------------------------------------------------------
-   // TOPIC 3: Đại số tuyến tính
+   // TOPIC 3: Điện từ học (Tạm thời ẩn nếu chưa có thumbnail/nội dung đầy đủ)
    // -------------------------------------------------------------
    const topic3Id = new ObjectId();
    await db.collection('topics').insertOne({
       _id: topic3Id,
+      title: 'Điện từ học',
+      slug: 'dien-tu-hoc',
+      description: 'Khảo sát điện trường, từ trường và sự tương tác cơ bản giữa các điện tích.',
+      discipline: 'physics',
+      order: 3,
+      isActive: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+   });
+
+   // -------------------------------------------------------------
+   // TOPIC 4: Đại số tuyến tính (Tạm thời ẩn nếu chưa có thumbnail)
+   // -------------------------------------------------------------
+   const topic4Id = new ObjectId();
+   await db.collection('topics').insertOne({
+      _id: topic4Id,
       title: 'Đại số tuyến tính',
       slug: 'dai-so-tuyen-tinh',
       description: 'Không gian vectơ, phép toán ma trận, định thức và các phép biến đổi tuyến tính trong toán học.',
       discipline: 'maths',
-      order: 3,
-      isActive: true,
+      order: 4,
+      isActive: false,
       createdAt: new Date(),
       updatedAt: new Date(),
    });
