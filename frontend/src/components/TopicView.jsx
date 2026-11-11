@@ -202,11 +202,11 @@ export default function TopicView() {
                               }`}
                            >
                               <span className={`section-badge ${section.type === 'doc' ? 'doc-badge' : 'ex-badge'}`}>
-                                 {section.type === 'doc' ? 'Lý thuyết' : `Bài tập (${section.exercise?.type})`}
+                                 {section.type === 'doc' ? 'Lí thuyết' : `Bài tập (${section.exercise?.type})`}
                               </span>
                               <h4 className="section-title">{section.title}</h4>
 
-                              {/* Render Section Lý Thuyết */}
+                              {/* Render Section Lí thuyết */}
                               {section.type === 'doc' && section.docContent && (
                                  <LatexMarkdown content={section.docContent.body} />
                               )}

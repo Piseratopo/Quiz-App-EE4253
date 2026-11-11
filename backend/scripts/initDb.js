@@ -15,7 +15,7 @@ async function seedData(db) {
       _id: topic1Id,
       title: 'Cơ học cổ điển',
       slug: 'co-hoc-co-dien',
-      description: 'Nghiên cứu về chuyển động của các vật thể và các định luật Newton nền tảng trong vật lý học.',
+      description: 'Nghiên cứu về chuyển động của các vật thể và các định luật Newton nền tảng trong vật lí học.',
       discipline: 'physics',
       thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/v1794192698/classical_mechanics_iddoha.png',
       order: 1,
@@ -45,7 +45,7 @@ async function seedData(db) {
       order: 1,
       sections: [
          {
-            title: 'I. Lý thuyết cốt lõi',
+            title: 'I. Lí thuyết cốt lõi',
             order: 1,
             type: 'doc',
             docContent: {
@@ -126,7 +126,7 @@ $$a = \\frac{\\Delta v}{\\Delta t} = \\text{const}$$
       order: 2,
       sections: [
          {
-            title: 'I. Lý thuyết chuyển động tròn đều',
+            title: 'I. Lí thuyết chuyển động tròn đều',
             order: 1,
             type: 'doc',
             docContent: {
@@ -219,7 +219,7 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
       _id: topic2Id,
       title: 'Nhiệt động lực học',
       slug: 'nhiet-dong-luc-hoc',
-      description: 'Các nguyên lý bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
+      description: 'Các nguyên lí bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
       discipline: 'physics',
       thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
       order: 2,
@@ -232,7 +232,7 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
    await db.collection('chapters').insertOne({
       _id: chap2_1Id,
       topicId: topic2Id,
-      name: 'Nguyên lý I Nhiệt động lực học',
+      name: 'Nguyên lí I Nhiệt động lực học',
       description: 'Độ biến thiên nội năng, công và nhiệt lượng trong các đẳng quá trình.',
       order: 1,
       createdAt: new Date(),
@@ -243,16 +243,16 @@ $$\\vec{F}_1 + \\vec{F}_2 + \\dots + \\vec{F}_n = m \\vec{a}$$
       _id: new ObjectId(),
       chapterId: chap2_1Id,
       title: 'Nội năng, Nhiệt lượng và Công',
-      description: 'Hệ thức của Nguyên lý I: dU = dA + dQ và ứng dụng tính công chất khí.',
+      description: 'Hệ thức của Nguyên lí I: dU = dA + dQ và ứng dụng tính công chất khí.',
       order: 1,
       sections: [
          {
-            title: 'I. Lý thuyết Nguyên lý I',
+            title: 'I. Lí thuyết Nguyên lí I',
             order: 1,
             type: 'doc',
             docContent: {
                format: 'markdown',
-               body: `### 1. Phát biểu Nguyên lý I
+               body: `### 1. Phát biểu Nguyên lí I
 Độ biến thiên nội năng $\\Delta U$ của hệ bằng tổng công $A$ và nhiệt lượng $Q$ mà hệ nhận được:
 $$\\Delta U = A + Q$$
 
@@ -262,7 +262,7 @@ $$\\Delta U = A + Q$$
 
 ### 3. Áp dụng cho các đẳng quá trình
 - **Đẳng tích ($V = \\text{const}$):** Khí không sinh công ($A = 0$), do đó $\\Delta U = Q$.
-- **Đẳng nhiệt ($T = \\text{const}$):** Đối với khí lý tưởng, nội năng không đổi ($\\Delta U = 0$), do đó $Q = -A = A'$ (nhiệt lượng nhận vào chuyển hết thành công sinh ra).
+- **Đẳng nhiệt ($T = \\text{const}$):** Đối với khí lí tưởng, nội năng không đổi ($\\Delta U = 0$), do đó $Q = -A = A'$ (nhiệt lượng nhận vào chuyển hết thành công sinh ra).
 `,
                attachments: [],
             },
@@ -273,7 +273,7 @@ $$\\Delta U = A + Q$$
             type: 'exercise',
             exercise: {
                type: 'mcq_single',
-               question: 'Một khối khí lý tưởng nhận nhiệt lượng $Q = 100\\text{ J}$ từ nguồn nóng và đồng thời thực hiện một công $A\' = 40\\text{ J}$ lên môi trường. Độ biến thiên nội năng $\\Delta U$ của khối khí là:',
+               question: 'Một khối khí lí tưởng nhận nhiệt lượng $Q = 100\\text{ J}$ từ nguồn nóng và đồng thời thực hiện một công $A\' = 40\\text{ J}$ lên môi trường. Độ biến thiên nội năng $\\Delta U$ của khối khí là:',
                mediaList: [],
                payload: {
                   options: [
@@ -286,7 +286,7 @@ $$\\Delta U = A + Q$$
                solution: {
                   correctAnswer: 'ans_1',
                },
-               explanation: 'Hệ nhận nhiệt lượng nên $Q = +100\\text{ J}$.\nHệ sinh công $A\' = 40\\text{ J}$, nghĩa là công hệ nhận vào là $A = -A\' = -40\\text{ J}$.\nÁp dụng Nguyên lý I:\n$$\\Delta U = A + Q = -40 + 100 = 60\\text{ J}$$',
+               explanation: 'Hệ nhận nhiệt lượng nên $Q = +100\\text{ J}$.\nHệ sinh công $A\' = 40\\text{ J}$, nghĩa là công hệ nhận vào là $A = -A\' = -40\\text{ J}$.\nÁp dụng Nguyên lí I:\n$$\\Delta U = A + Q = -40 + 100 = 60\\text{ J}$$',
             },
          },
       ],

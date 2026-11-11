@@ -1,6 +1,9 @@
 // -------------------------------------------------------------
 // SciSolve Topics Catalog Styling (Matching Wireframe & Spec)
+// Shared utilities live in common.scss
 // -------------------------------------------------------------
+
+@use './common' as *;
 
 .scisolve-catalog-page {
   background-color: var(--page-bg-color);
@@ -18,7 +21,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
-  padding: 2.5rem 1rem 2.5rem 1rem;
+  padding: 2rem 1rem;
 
   // Subtle math grid pattern
   background-size: 32px 32px;
@@ -30,6 +33,11 @@
     max-width: 80rem;
     margin: 0 auto;
     padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    box-sizing: border-box;
   }
 
   .catalog-hero-title {
@@ -38,10 +46,10 @@
     color: var(--color-text);
     letter-spacing: -0.03em;
     line-height: 1.2;
-    margin: 0 0 0.5rem 0;
+    margin: 0;
 
-    @media (min-width: 640px) {
-      font-size: 2.5rem;
+    @media (max-width: 640px) {
+      font-size: 1.85rem;
     }
   }
 
@@ -127,10 +135,7 @@
   }
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+// (spin keyframe lives in common.scss)
 
 .catalog-sections-wrap {
   display: flex;

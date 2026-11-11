@@ -184,7 +184,7 @@ export default function Auth() {
 
                   <div>
                      <button className="auth-submit-btn" type="submit" disabled={loginLoading}>
-                        <span>{loginLoading ? 'Đang xử lý...' : 'Đăng nhập'}</span>
+                        <span>{loginLoading ? 'Đang xử lí...' : 'Đăng nhập'}</span>
                      </button>
                   </div>
                </form>
@@ -312,7 +312,7 @@ export default function Auth() {
                         type="submit"
                         disabled={regLoading}
                      >
-                        <span>{regLoading ? 'Đang xử lý...' : 'Đăng ký'}</span>
+                        <span>{regLoading ? 'Đang xử lí...' : 'Đăng ký'}</span>
                      </button>
                   </div>
 

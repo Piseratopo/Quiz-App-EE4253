@@ -36,7 +36,7 @@ function Header() {
    const navLinks = [
       { to: '/home', label: 'Trang chủ' },
       { to: '/topics', label: 'Chủ đề' },
-      { to: '/topic-manager', label: 'Quản lý Chuyên đề' },
+      { to: '/topic-manager', label: 'Quản lí chuyên đề' },
    ];
 
    const getLinkClass = (path) => {
@@ -81,7 +81,7 @@ function Header() {
                            Trang chủ
                         </Link>
                         <Link to="/topic-manager" className={getLinkClass('/topic-manager')}>
-                           Quản lý Chuyên đề
+                           Quản lí chuyên đề
                         </Link>
                         <Link to="/auth" className={getLinkClass('/auth')}>
                            Đăng nhập / Đăng ký

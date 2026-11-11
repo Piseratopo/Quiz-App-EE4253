@@ -55,15 +55,11 @@ export default function Topics() {
 
    return (
       <div className="scisolve-catalog-page">
-         {/* Top Hero Section */}
          <section className="catalog-hero-section">
             <div className="catalog-hero-container">
                <h1 className="catalog-hero-title">
                   Danh mục chủ đề
                </h1>
-               <p className="catalog-hero-desc">
-                  Tiếp cận khoa học từ nguyên lý gốc thông qua các mô phỏng tương tác sinh động, trực quan hóa công thức và thử nghiệm không giới hạn.
-               </p>
             </div>
          </section>
 

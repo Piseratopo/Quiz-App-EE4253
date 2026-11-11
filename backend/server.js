@@ -5,7 +5,6 @@ const cors = require('cors');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
-const { seedData } = require('./scripts/initDb');
 
 const app = express();
 const port = Number(process.env.PORT || 8000);
@@ -20,6 +19,19 @@ app.use(express.json());
 
 function asObjectId(value) {
    return ObjectId.isValid(value) ? new ObjectId(value) : null;
+}
+
+function generateSlug(text) {
+   return (text || '')
+      .toString()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9 -]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
 }
 
 function serializeQuestion(question, includeId = true) {
@@ -377,6 +389,216 @@ app.delete('/api/topics/:id', async (req, res, next) => {
    } catch (error) { next(error); }
 });
 
+// Admin: Get topic details with full chapter and lesson data for management
+app.get('/api/admin/topics/:slug', async (req, res, next) => {
+   try {
+      const topic = await db.collection('topics').findOne({ slug: req.params.slug });
+      if (!topic) return res.status(404).json({ error: 'Không tìm thấy chuyên đề' });
+
+      const chapters = await db.collection('chapters')
+         .find({ topicId: topic._id })
+         .sort({ order: 1, _id: 1 })
+         .toArray();
+
+      const chapterIds = chapters.map((c) => c._id);
+      const lessons = await db.collection('lessons')
+         .find({ chapterId: { $in: chapterIds } })
+         .sort({ order: 1, _id: 1 })
+         .toArray();
+
+      const chaptersWithLessons = chapters.map((chap) => {
+         const chapLessons = lessons.filter((l) => l.chapterId.equals(chap._id)).map((lesson) => {
+            const sections = lesson.sections || [];
+            const docsCount = sections.filter((s) => s.type === 'doc').length;
+            const exercisesCount = sections.filter((s) => s.type === 'exercise').length;
+            return {
+               ...lesson,
+               sectionsCount: sections.length,
+               docsCount,
+               exercisesCount,
+            };
+         });
+         return {
+            ...chap,
+            lessons: chapLessons,
+         };
+      });
+
+      return res.json({ ...topic, chapters: chaptersWithLessons });
+   } catch (error) { next(error); }
+});
+
+// Get chapters (optionally filtered by topicId)
+app.get('/api/chapters', async (req, res, next) => {
+   try {
+      const filter = {};
+      if (req.query.topicId) {
+         const tId = asObjectId(req.query.topicId);
+         if (tId) filter.topicId = tId;
+      }
+      const chapters = await db.collection('chapters').find(filter).sort({ order: 1 }).toArray();
+      return res.json(chapters);
+   } catch (error) { next(error); }
+});
+
+// Create chapter
+app.post('/api/chapters', async (req, res, next) => {
+   try {
+      const { topicId, name, description, order } = req.body || {};
+      const tId = asObjectId(topicId);
+      if (!tId || !name) return res.status(400).json({ error: 'Topic ID và tên chương là bắt buộc' });
+      const count = await db.collection('chapters').countDocuments({ topicId: tId });
+      const newChapter = {
+         topicId: tId,
+         name,
+         description: description || '',
+         order: Number(order) || count + 1,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      };
+      const result = await db.collection('chapters').insertOne(newChapter);
+      return res.status(201).json({ ...newChapter, _id: result.insertedId, lessons: [] });
+   } catch (error) { next(error); }
+});
+
+// Update chapter
+app.put('/api/chapters/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const { name, description, order } = req.body || {};
+      const updateData = { updatedAt: new Date() };
+      if (name !== undefined) updateData.name = name;
+      if (description !== undefined) updateData.description = description;
+      if (order !== undefined) updateData.order = Number(order);
+
+      await db.collection('chapters').updateOne({ _id: id }, { $set: updateData });
+      const updated = await db.collection('chapters').findOne({ _id: id });
+      return res.json(updated);
+   } catch (error) { next(error); }
+});
+
+// Delete chapter
+app.delete('/api/chapters/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      await db.collection('lessons').deleteMany({ chapterId: id });
+      await db.collection('chapters').deleteOne({ _id: id });
+      return res.json({ message: 'Xóa chương thành công' });
+   } catch (error) { next(error); }
+});
+
+// Create lesson
+app.post('/api/lessons', async (req, res, next) => {
+   try {
+      const { chapterId, title, slug, description, order, isActive, sections } = req.body || {};
+      const cId = asObjectId(chapterId);
+      if (!cId || !title) return res.status(400).json({ error: 'Chapter ID và tên bài học là bắt buộc' });
+      const count = await db.collection('lessons').countDocuments({ chapterId: cId });
+      const newLesson = {
+         chapterId: cId,
+         title,
+         slug: slug || generateSlug(title),
+         description: description || '',
+         order: Number(order) || count + 1,
+         isActive: isActive !== false,
+         sections: Array.isArray(sections) ? sections : [],
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      };
+      const result = await db.collection('lessons').insertOne(newLesson);
+      return res.status(201).json({
+         ...newLesson,
+         _id: result.insertedId,
+         sectionsCount: newLesson.sections.length,
+         docsCount: newLesson.sections.filter((s) => s.type === 'doc').length,
+         exercisesCount: newLesson.sections.filter((s) => s.type === 'exercise').length,
+      });
+   } catch (error) { next(error); }
+});
+
+// Get full lesson for editing (including unstripped exercises and solutions)
+app.get('/api/admin/lessons/:id', async (req, res, next) => {
+   const id = asObjectId(req.params.id);
+   if (!id) return res.status(400).json({ error: 'ID bài học không hợp lệ' });
+   try {
+      const lesson = await db.collection('lessons').findOne({ _id: id });
+      if (!lesson) return res.status(404).json({ error: 'Không tìm thấy bài học' });
+
+      let chapter = null;
+      let topic = null;
+      if (lesson.chapterId) {
+         chapter = await db.collection('chapters').findOne({ _id: lesson.chapterId });
+         if (chapter && chapter.topicId) {
+            topic = await db.collection('topics').findOne({ _id: chapter.topicId });
+         }
+      }
+
+      return res.json({
+         ...lesson,
+         chapterTitle: chapter?.name || '',
+         topicTitle: topic?.title || '',
+         topicSlug: topic?.slug || '',
+      });
+   } catch (error) { next(error); }
+});
+
+// Update lesson
+app.put('/api/lessons/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const { title, slug, description, order, isActive, chapterId, sections } = req.body || {};
+      const updateData = { updatedAt: new Date() };
+      if (title !== undefined) updateData.title = title;
+      if (slug !== undefined) updateData.slug = slug;
+      if (description !== undefined) updateData.description = description;
+      if (order !== undefined) updateData.order = Number(order);
+      if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+      if (chapterId) {
+         const newCId = asObjectId(chapterId);
+         if (newCId) updateData.chapterId = newCId;
+      }
+      if (sections !== undefined) {
+         updateData.sections = Array.isArray(sections) ? sections : [];
+      }
+
+      await db.collection('lessons').updateOne({ _id: id }, { $set: updateData });
+      const updated = await db.collection('lessons').findOne({ _id: id });
+      const updatedSections = updated.sections || [];
+      return res.json({
+         ...updated,
+         sectionsCount: updatedSections.length,
+         docsCount: updatedSections.filter((s) => s.type === 'doc').length,
+         exercisesCount: updatedSections.filter((s) => s.type === 'exercise').length,
+      });
+   } catch (error) { next(error); }
+});
+
+// Toggle lesson isActive
+app.patch('/api/lessons/:id/toggle-status', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const lesson = await db.collection('lessons').findOne({ _id: id });
+      if (!lesson) return res.status(404).json({ error: 'Không tìm thấy bài học' });
+      const newStatus = !lesson.isActive;
+      await db.collection('lessons').updateOne({ _id: id }, { $set: { isActive: newStatus, updatedAt: new Date() } });
+      return res.json({ _id: id, isActive: newStatus });
+   } catch (error) { next(error); }
+});
+
+// Delete lesson
+app.delete('/api/lessons/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      await db.collection('lessons').deleteOne({ _id: id });
+      return res.json({ message: 'Xóa bài học thành công' });
+   } catch (error) { next(error); }
+});
+
 // 1. Get all active topics (public catalog)
 app.get('/api/topics', async (req, res, next) => {
    try {
@@ -509,125 +731,6 @@ async function start() {
       db.collection('chapters').createIndex({ topicId: 1, order: 1 }),
       db.collection('lessons').createIndex({ chapterId: 1, order: 1 }),
    ]);
-
-   // Ensure existing topics have discipline and thumbnail populated
-   await db.collection('topics').updateOne(
-      { slug: 'co-hoc-co-dien' },
-      {
-         $set: {
-            thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/v1794192698/classical_mechanics_iddoha.png',
-            discipline: 'physics',
-            isActive: true,
-         },
-      }
-   );
-
-   // Ensure Nhiệt động lực học exists with thumbnail
-   const thermoExists = await db.collection('topics').findOne({ slug: 'nhiet-dong-luc-hoc' });
-   if (!thermoExists) {
-      const thermoId = new ObjectId();
-      await db.collection('topics').insertOne({
-         _id: thermoId,
-         title: 'Nhiệt động lực học',
-         slug: 'nhiet-dong-luc-hoc',
-         description: 'Các nguyên lý bảo toàn nhiệt lượng, entropy, chu trình Carnot và động học phân tử chất khí.',
-         discipline: 'physics',
-         thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
-         order: 2,
-         isActive: true,
-         createdAt: new Date(),
-         updatedAt: new Date(),
-      });
-
-      const chapThermoId = new ObjectId();
-      await db.collection('chapters').insertOne({
-         _id: chapThermoId,
-         topicId: thermoId,
-         name: 'Nguyên lý I Nhiệt động lực học',
-         description: 'Độ biến thiên nội năng, công và nhiệt lượng trong các đẳng quá trình.',
-         order: 1,
-         createdAt: new Date(),
-         updatedAt: new Date(),
-      });
-
-      await db.collection('lessons').insertOne({
-         _id: new ObjectId(),
-         chapterId: chapThermoId,
-         title: 'Nội năng, Nhiệt lượng và Công',
-         description: 'Hệ thức của Nguyên lý I: dU = dA + dQ và ứng dụng tính công chất khí.',
-         order: 1,
-         sections: [
-            {
-               title: 'I. Lý thuyết Nguyên lý I',
-               order: 1,
-               type: 'doc',
-               docContent: {
-                  format: 'markdown',
-                  body: `### 1. Phát biểu Nguyên lý I
-Độ biến thiên nội năng $\\Delta U$ của hệ bằng tổng công $A$ và nhiệt lượng $Q$ mà hệ nhận được:
-$$\\Delta U = A + Q$$
-
-### 2. Quy ước dấu
-- $Q > 0$: Hệ **nhận** nhiệt lượng; $Q < 0$: Hệ **truyền** nhiệt lượng.
-- $A > 0$: Hệ **nhận** công; $A < 0$: Hệ **sinh** công ($A' = -A > 0$).
-
-### 3. Áp dụng cho các đẳng quá trình
-- **Đẳng tích ($V = \\text{const}$):** Khí không sinh công ($A = 0$), do đó $\\Delta U = Q$.
-- **Đẳng nhiệt ($T = \\text{const}$):** Đối với khí lý tưởng, nội năng không đổi ($\\Delta U = 0$), do đó $Q = -A = A'$ (nhiệt lượng nhận vào chuyển hết thành công sinh ra).
-`,
-                  attachments: [],
-               },
-            },
-            {
-               title: 'II. Bài tập trắc nghiệm',
-               order: 2,
-               type: 'exercise',
-               exercise: {
-                  type: 'mcq_single',
-                  question: 'Một khối khí lý tưởng nhận nhiệt lượng $Q = 100\\text{ J}$ từ nguồn nóng và đồng thời thực hiện một công $A\' = 40\\text{ J}$ lên môi trường. Độ biến thiên nội năng $\\Delta U$ của khối khí là:',
-                  mediaList: [],
-                  payload: {
-                     options: [
-                        { id: 'ans_1', label: '$\\Delta U = 60\\text{ J}$' },
-                        { id: 'ans_2', label: '$\\Delta U = 140\\text{ J}$' },
-                        { id: 'ans_3', label: '$\\Delta U = -60\\text{ J}$' },
-                        { id: 'ans_4', label: '$\\Delta U = 40\\text{ J}$' },
-                     ],
-                  },
-                  solution: {
-                     correctAnswer: 'ans_1',
-                  },
-                  explanation: 'Hệ nhận nhiệt lượng nên $Q = +100\\text{ J}$.\nHệ sinh công $A\' = 40\\text{ J}$, nghĩa là công hệ nhận vào là $A = -A\' = -40\\text{ J}$.\nÁp dụng Nguyên lý I:\n$$\\Delta U = A + Q = -40 + 100 = 60\\text{ J}$$',
-               },
-            },
-         ],
-         createdAt: new Date(),
-         updatedAt: new Date(),
-      });
-   } else {
-      await db.collection('topics').updateOne(
-         { slug: 'nhiet-dong-luc-hoc' },
-         {
-            $set: {
-               thumbnail: 'https://res.cloudinary.com/dbs8tddkg/image/upload/f_auto/q_auto/thermodynamics_veaum5.png',
-               discipline: 'physics',
-               isActive: true,
-            },
-         }
-      );
-   }
-
-   // Gán mặc định isActive cho các môn chưa có thuộc tính này
-   await db.collection('topics').updateMany(
-      { slug: { $nin: ['co-hoc-co-dien', 'nhiet-dong-luc-hoc'] }, isActive: { $exists: false } },
-      { $set: { isActive: false } }
-   );
-
-   // Auto-seed if database is clean
-   const topicCount = await db.collection('topics').countDocuments();
-   if (topicCount === 0) {
-      await seedData(db);
-   }
 
    app.listen(port, () => console.log(`Backend listening on http://localhost:${port}`));
 }
