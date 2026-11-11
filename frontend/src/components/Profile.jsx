@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../configs/apiClient';
 import MultipleChoiceQuestion from './questions/MultipleChoiceQuestion';
-import Pagination from './Pagination';
 
 function SearchBar({ search, setPage, setSearch }) {
    return (
@@ -222,11 +221,6 @@ function Profile() {
                         />
                      )
                )}
-            <Pagination 
-               page={page} 
-               setPage={setPage} 
-               totalPage={totalPage} 
-            />
          </div>
       </div>
    );

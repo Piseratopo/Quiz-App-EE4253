@@ -4,6 +4,8 @@ import Home from './Home';
 import Landing from './Landing';
 import Profile from './Profile';
 import Topics from './Topics';
+import TopicView from './TopicView';
+import TopicManager from './TopicManager';
 import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
@@ -15,6 +17,8 @@ function Quiz() {
    const privateRoutes = [
       { path: '/home', element: <Home /> },
       { path: '/topics', element: <Topics /> },
+      { path: '/topics/:slug', element: <TopicView /> },
+      { path: '/topic-manager', element: <TopicManager /> },
       { path: '/profile', element: <Profile /> },
    ];
 
@@ -23,6 +27,7 @@ function Quiz() {
          <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/topic-manager" element={<TopicManager />} />
             {privateRoutes.map((route) => (
                <Route
                   key={route.path}

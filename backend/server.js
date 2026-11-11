@@ -215,12 +215,174 @@ app.patch('/api/update-password', requireToken, async (req, res, next) => {
 // LEARNING SYSTEM APIs (Topics, Chapters, Lessons)
 // ==========================================
 
-// 1. Get all active topics
+// Helper: Normalize discipline query
+function normalizeDiscipline(disc) {
+   if (!disc) return null;
+   if (disc === 'phys' || disc === 'physics') return ['phys', 'physics'];
+   if (disc === 'math' || disc === 'maths') return ['math', 'maths'];
+   return [disc];
+}
+
+// Admin Topics API - returns topics with chapter, lesson, and exercise counts
+app.get('/api/admin/topics', async (req, res, next) => {
+   try {
+      const filter = {};
+      if (req.query.discipline) {
+         filter.discipline = { $in: normalizeDiscipline(req.query.discipline) };
+      }
+      if (req.query.status) {
+         if (req.query.status === 'active') {
+            filter.isActive = { $ne: false };
+         } else if (req.query.status === 'inactive') {
+            filter.isActive = false;
+         }
+      }
+      if (req.query.search) {
+         const escaped = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+         filter.$or = [
+            { title: { $regex: escaped, $options: 'i' } },
+            { slug: { $regex: escaped, $options: 'i' } },
+         ];
+      }
+
+      const topics = await db.collection('topics')
+         .find(filter)
+         .sort({ order: 1, _id: 1 })
+         .toArray();
+
+      const topicIds = topics.map((t) => t._id);
+      const chapters = await db.collection('chapters').find({ topicId: { $in: topicIds } }).toArray();
+      const chapterIds = chapters.map((c) => c._id);
+      const lessons = await db.collection('lessons').find({ chapterId: { $in: chapterIds } }).toArray();
+
+      const enrichedTopics = topics.map((topic) => {
+         const topicChapters = chapters.filter((c) => c.topicId && c.topicId.equals(topic._id));
+         const topicChapterIds = topicChapters.map((c) => c._id.toString());
+         const topicLessons = lessons.filter((l) => l.chapterId && topicChapterIds.includes(l.chapterId.toString()));
+         const exercisesCount = topicLessons.reduce((acc, l) => {
+            const exs = (l.sections || []).filter((s) => s.type === 'exercise');
+            return acc + exs.length;
+         }, 0);
+
+         return {
+            ...topic,
+            chaptersCount: topicChapters.length,
+            lessonsCount: topicLessons.length,
+            exercisesCount,
+         };
+      });
+
+      // Overall metrics
+      const totalTopics = await db.collection('topics').countDocuments();
+      const totalLessons = await db.collection('lessons').countDocuments();
+      const allLessons = await db.collection('lessons').find({}, { projection: { sections: 1 } }).toArray();
+      const totalExercises = allLessons.reduce((acc, l) => {
+         const exs = (l.sections || []).filter((s) => s.type === 'exercise');
+         return acc + exs.length;
+      }, 0);
+
+      return res.json({
+         topics: enrichedTopics,
+         metrics: {
+            totalTopics,
+            totalLessons,
+            totalExercises,
+         },
+      });
+   } catch (error) { next(error); }
+});
+
+// Create a new topic
+app.post('/api/topics', async (req, res, next) => {
+   try {
+      const { title, slug, description, discipline, thumbnail, order, isActive } = req.body || {};
+      if (!title || !slug) {
+         return res.status(400).json({ error: 'Tiêu đề và Slug là bắt buộc' });
+      }
+      const existing = await db.collection('topics').findOne({ slug });
+      if (existing) {
+         return res.status(400).json({ error: 'Slug đã tồn tại. Vui lòng chọn slug khác.' });
+      }
+      const count = await db.collection('topics').countDocuments();
+      const newTopic = {
+         title,
+         slug,
+         description: description || '',
+         discipline: discipline || 'physics',
+         thumbnail: thumbnail || '',
+         order: Number(order) || count + 1,
+         isActive: isActive !== false,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      };
+      const result = await db.collection('topics').insertOne(newTopic);
+      return res.status(201).json({ ...newTopic, _id: result.insertedId });
+   } catch (error) { next(error); }
+});
+
+// Update topic details
+app.put('/api/topics/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const { title, slug, description, discipline, thumbnail, order, isActive } = req.body || {};
+      if (slug) {
+         const conflict = await db.collection('topics').findOne({ slug, _id: { $ne: id } });
+         if (conflict) {
+            return res.status(400).json({ error: 'Slug đã tồn tại ở chủ đề khác.' });
+         }
+      }
+      const updateData = { updatedAt: new Date() };
+      if (title !== undefined) updateData.title = title;
+      if (slug !== undefined) updateData.slug = slug;
+      if (description !== undefined) updateData.description = description;
+      if (discipline !== undefined) updateData.discipline = discipline;
+      if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
+      if (order !== undefined) updateData.order = Number(order);
+      if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+
+      await db.collection('topics').updateOne({ _id: id }, { $set: updateData });
+      const updated = await db.collection('topics').findOne({ _id: id });
+      return res.json(updated);
+   } catch (error) { next(error); }
+});
+
+// Toggle topic isActive
+app.patch('/api/topics/:id/toggle-status', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const topic = await db.collection('topics').findOne({ _id: id });
+      if (!topic) return res.status(404).json({ error: 'Không tìm thấy chủ đề' });
+      const newStatus = !topic.isActive;
+      await db.collection('topics').updateOne(
+         { _id: id },
+         { $set: { isActive: newStatus, updatedAt: new Date() } }
+      );
+      return res.json({ _id: id, isActive: newStatus });
+   } catch (error) { next(error); }
+});
+
+// Delete topic and its chapters + lessons
+app.delete('/api/topics/:id', async (req, res, next) => {
+   try {
+      const id = asObjectId(req.params.id);
+      if (!id) return res.status(400).json({ error: 'ID không hợp lệ' });
+      const chapters = await db.collection('chapters').find({ topicId: id }).toArray();
+      const chapterIds = chapters.map((c) => c._id);
+      await db.collection('lessons').deleteMany({ chapterId: { $in: chapterIds } });
+      await db.collection('chapters').deleteMany({ topicId: id });
+      await db.collection('topics').deleteOne({ _id: id });
+      return res.json({ message: 'Chuyên đề và các chương bài liên quan đã được xóa thành công.' });
+   } catch (error) { next(error); }
+});
+
+// 1. Get all active topics (public catalog)
 app.get('/api/topics', async (req, res, next) => {
    try {
-      const filter = { isActive: { $ne: false } };
+      const filter = req.query.all === 'true' ? {} : { isActive: { $ne: false } };
       if (req.query.discipline) {
-         filter.discipline = req.query.discipline;
+         filter.discipline = { $in: normalizeDiscipline(req.query.discipline) };
       }
       const topics = await db.collection('topics')
          .find(filter)
@@ -455,9 +617,9 @@ $$\\Delta U = A + Q$$
       );
    }
 
-   // Ẩn các môn/chủ đề hiện chưa làm (chưa có thumbnail)
+   // Gán mặc định isActive cho các môn chưa có thuộc tính này
    await db.collection('topics').updateMany(
-      { slug: { $nin: ['co-hoc-co-dien', 'nhiet-dong-luc-hoc'] } },
+      { slug: { $nin: ['co-hoc-co-dien', 'nhiet-dong-luc-hoc'] }, isActive: { $exists: false } },
       { $set: { isActive: false } }
    );
 

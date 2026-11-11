@@ -36,10 +36,13 @@ function Header() {
    const navLinks = [
       { to: '/home', label: 'Trang chủ' },
       { to: '/topics', label: 'Chủ đề' },
+      { to: '/topic-manager', label: 'Quản lý Chuyên đề' },
    ];
 
    const getLinkClass = (path) => {
-      const isActive = location.pathname === path;
+      const isActive =
+         location.pathname === path ||
+         (path === '/topics' && location.pathname.startsWith('/topics') && location.pathname !== '/topic-manager');
       return `common-btn-nav ${isActive ? 'active' : ''}`.trim();
    };
 
@@ -76,6 +79,9 @@ function Header() {
                      <>
                         <Link to="/" className={getLinkClass('/')}>
                            Trang chủ
+                        </Link>
+                        <Link to="/topic-manager" className={getLinkClass('/topic-manager')}>
+                           Quản lý Chuyên đề
                         </Link>
                         <Link to="/auth" className={getLinkClass('/auth')}>
                            Đăng nhập / Đăng ký
