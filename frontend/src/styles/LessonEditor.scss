@@ -250,68 +250,6 @@
       }
     }
 
-    .le-status-toggle-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.75rem;
-      padding-top: 1rem;
-
-      @media (min-width: 768px) {
-        justify-content: flex-end;
-      }
-
-      .toggle-switch {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        cursor: pointer;
-
-        input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-          position: absolute;
-
-          &:checked + .slider {
-            background-color: #2A6C00;
-
-            &::before {
-              transform: translateX(1.1rem);
-            }
-          }
-        }
-
-        .slider {
-          width: 2.4rem;
-          height: 1.35rem;
-          background-color: #cbd5e1;
-          border-radius: 9999px;
-          transition: background-color 0.2s ease;
-          position: relative;
-
-          &::before {
-            content: '';
-            position: absolute;
-            height: 1.05rem;
-            width: 1.05rem;
-            left: 0.15rem;
-            bottom: 0.15rem;
-            background-color: #ffffff;
-            border-radius: 50%;
-            transition: transform 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-          }
-        }
-
-        .toggle-label {
-          margin-left: 0.5rem;
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: rgba(0, 0, 0, 0.75);
-        }
-      }
-    }
   }
 }
 

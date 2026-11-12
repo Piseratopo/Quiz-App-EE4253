@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../configs/apiClient';
 import LatexMarkdown from './common/LatexMarkdown';
 import '../styles/LessonEditor.scss';
@@ -13,7 +13,6 @@ export default function LessonEditor() {
    const [activeSectionIdx, setActiveSectionIdx] = useState(0);
    const [loading, setLoading] = useState(true);
    const [saving, setSaving] = useState(false);
-   const [lastSavedTime, setLastSavedTime] = useState(null);
    const [toast, setToast] = useState(null);
 
    const showToast = (message, type = 'success') => {
@@ -53,7 +52,6 @@ export default function LessonEditor() {
                         },
                      ];
                   setSections(secs);
-                  setLastSavedTime(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
                }
             }
          } catch (err) {
@@ -279,7 +277,6 @@ export default function LessonEditor() {
             }
          }
 
-         setLastSavedTime(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
          showToast('Đã lưu bài học thành công!');
       } catch (err) {
          console.error('Lỗi khi lưu bài học:', err);
@@ -330,17 +327,6 @@ export default function LessonEditor() {
                      />
                   </div>
 
-                  <div className="le-status-toggle-wrap">
-                     <label className="toggle-switch">
-                        <input
-                           type="checkbox"
-                           checked={lesson?.isActive !== false}
-                           onChange={(e) => setLesson((prev) => ({ ...prev, isActive: e.target.checked }))}
-                        />
-                        <span className="slider"></span>
-                        <span className="toggle-label">Công khai (Live)</span>
-                     </label>
-                  </div>
                </div>
             </div>
 
