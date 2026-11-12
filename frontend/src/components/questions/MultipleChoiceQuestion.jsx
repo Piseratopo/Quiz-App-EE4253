@@ -44,16 +44,16 @@ export default function MultipleChoiceQuestion({
    const navigate = useNavigate();
 
    return (
-      <form className="my-6">
-         <div className="my-2 border-primary border-2 transition duration-400 ease-in-out">
-            <div className="border-b border-primary flex items-center">
-               <div className="text-sm px-1 w-full">
+      <form className="mcq-form">
+         <div className="mcq-card">
+            <div className="mcq-card-header">
+               <div className="mcq-card-type">
                   Question Type: Multiple Choice
                </div>
                {deletable && (
-                  <div className="text-sm px-1 flex items-center">
+                  <div className="mcq-delete-wrap">
                      <button
-                        className="opacity-50 hover:opacity-100 transition duration-400 ease-in-out"
+                     className="mcq-delete-button"
                         onClick={(e) => {
                            e.preventDefault();
                            deleteQuestion(id, navigate);
@@ -64,17 +64,13 @@ export default function MultipleChoiceQuestion({
                   </div>
                )}
             </div>
-            <div className="text-2xl flex items-center justify-center py-12 px-4">
-               <p className="text-center">{question}</p>
+            <div className="mcq-question">
+               <p className="mcq-question-text">{question}</p>
             </div>
             {playable && (
                <button
-                  className={`w-full py-2 transition duration-400 ease-in-out ${
-                     isSubmitted
-                        ? 'bg-background text-primary '
-                        : userChoice
-                          ? 'bg-primary text-background'
-                          : 'bg-gray-400 text-background disabled'
+                  className={`mcq-submit ${
+                     isSubmitted ? 'is-submitted' : userChoice ? 'has-selection' : 'is-unavailable'
                   }`}
                   type="submit"
                   onClick={(e) => {
@@ -90,28 +86,27 @@ export default function MultipleChoiceQuestion({
             )}
          </div>
          <div
-            className="grid gap-2"
+            className="mcq-choices"
             style={{
                gridTemplateColumns: `repeat(${choiceArray.length}, 1fr)`,
             }}
          >
             {choiceArray.map((choice) => (
                <label
-                  className={`flex items-center justify-center py-8 px-4 border border-primary text-center text-lg transition duration-400 ease-in-out ${
+                  className={`mcq-choice ${
                      isSubmitted
                         ? correctAnswersArray.includes(choice)
-                           ? 'bg-primary text-background'
+                           ? 'is-correct'
                            : userChoice === choice
-                             ? 'bg-wrong text-background border-wrong'
+                             ? 'is-incorrect'
                              : ''
                         : userChoice === choice
-                          ? 'bg-secondary'
+                          ? 'is-selected'
                           : ''
-                  } ${userChoice === choice ? 'font-bold' : ''}`}
+                  } ${userChoice === choice ? 'is-active' : ''}`}
                   key={choice}
                >
                   <input
-                     className="appearance-none"
                      type="radio"
                      name={`${question}`}
                      value={choice}

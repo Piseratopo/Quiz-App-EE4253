@@ -519,9 +519,9 @@ export default function ChapterManager() {
                                              <tr>
                                                 <th className="center" style={{ width: '56px' }}>STT</th>
                                                 <th>Tên bài học & Đường dẫn</th>
-                                                <th className="center">Cấu trúc nội dung</th>
-                                                <th className="center">Trạng thái</th>
-                                                <th className="right" style={{ paddingRight: '1.25rem' }}>Thao tác</th>
+                                                <th style={{ width: '22%' }}>Quy mô</th>
+                                                <th style={{ width: '18%' }}>Trạng thái</th>
+                                                <th className="right" style={{ width: '150px', paddingRight: '1.25rem' }}>Thao tác</th>
                                              </tr>
                                           </thead>
                                           <tbody>
@@ -534,7 +534,7 @@ export default function ChapterManager() {
                                                 return (
                                                    <tr key={lesson._id}>
                                                       {/* STT */}
-                                                      <td className="center nowrap">
+                                                      <td className="nowrap">
                                                          <div className="cm-stt-col">
                                                             <span
                                                                className="material-symbols-outlined drag-icon"
@@ -567,31 +567,31 @@ export default function ChapterManager() {
                                                          </div>
                                                       </td>
 
-                                                      {/* Cấu trúc nội dung */}
-                                                      <td className="center nowrap">
-                                                         <div className="cm-sections-summary">
-                                                            <span className="sec-item">
-                                                               <span className="material-symbols-outlined icon">article</span>
-                                                               <span>{docsCount} Lí thuyết</span>
+                                                      {/* Quy mô */}
+                                                      <td className="nowrap">
+                                                         <div className="tm-stats-cell">
+                                                            <span>
+                                                               
+                                                               <span className="stats-primary">{docsCount} Lí thuyết</span>
                                                             </span>
-                                                            <span>•</span>
-                                                            <span className="sec-item">
-                                                               <span className="material-symbols-outlined icon">quiz</span>
-                                                               <span>{exercisesCount} Bài tập</span>
+                                                            
+                                                            <span>
+                                                               
+                                                               <span className="stats-secondary">{exercisesCount} Bài tập</span>
                                                             </span>
                                                          </div>
                                                       </td>
 
                                                       {/* Trạng thái */}
-                                                      <td className="center nowrap">
+                                                      <td className="nowrap">
                                                          <span
-                                                            className={`cm-status-badge ${isActive ? 'active' : 'inactive'}`}
+                                                            className="tm-status-toggle"
                                                             style={{ cursor: 'pointer' }}
                                                             onClick={() => handleToggleLessonStatus(lesson)}
                                                             title="Nhấn để đổi trạng thái"
                                                          >
-                                                            <span className="dot"></span>
-                                                            <span>{isActive ? 'Hiển thị' : 'Bản nháp'}</span>
+                                                            <div className={`toggle-track${isActive ? ' active' : ''}`}><div className={`toggle-thumb${isActive ? ' active' : ''}`} /></div>
+                                                            <span className={`status-text${isActive ? ' active' : ' inactive'}`}>{isActive ? 'Hiển thị' : 'Ẩn'}</span>
                                                          </span>
                                                       </td>
 

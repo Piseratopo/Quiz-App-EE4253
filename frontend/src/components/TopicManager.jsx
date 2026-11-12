@@ -361,7 +361,6 @@ export default function TopicManager() {
                               <th>Phân ngành</th>
                               <th>Quy mô</th>
                               <th>Trạng thái</th>
-                              <th>Cập nhật</th>
                               <th className="right" style={{ paddingRight: '1.25rem' }}>Thao tác</th>
                            </tr>
                         </thead>
@@ -414,8 +413,6 @@ export default function TopicManager() {
                                           </span>
                                        </div>
                                     </td>
-
-                                    <td className="nowrap tm-date-cell">{formatDate(topic.updatedAt || topic.createdAt)}</td>
 
                                     <td className="right nowrap" style={{ paddingRight: '1.25rem' }}>
                                        <div className="tm-actions-group">

@@ -9,7 +9,6 @@ export default function LessonEditor() {
    const navigate = useNavigate();
 
    const [lesson, setLesson] = useState(null);
-   const [chapters, setChapters] = useState([]);
    const [sections, setSections] = useState([]);
    const [activeSectionIdx, setActiveSectionIdx] = useState(0);
    const [loading, setLoading] = useState(true);
@@ -22,16 +21,12 @@ export default function LessonEditor() {
       setTimeout(() => setToast(null), 3200);
    };
 
-   // ── Load Lesson & Chapters ────────────────────────────────────────────────
+   // ── Load Lesson ──────────────────────────────────────────────────────────
    useEffect(() => {
       let isMounted = true;
       const loadData = async () => {
          setLoading(true);
          try {
-            // Fetch chapters
-            const chapRes = await apiClient.get('/chapters');
-            if (isMounted) setChapters(chapRes.data || []);
-
             if (lessonId) {
                let lessonData = null;
                try {
@@ -317,53 +312,6 @@ export default function LessonEditor() {
             </div>
          )}
 
-         {/* ================= TOP NAVBAR ================= */}
-         <header className="le-top-header">
-            <div className="le-brand-group">
-               <Link to="/topic-manager" className="le-brand-link">
-                  <div className="le-brand-badge">Sc</div>
-                  <span className="le-brand-name">
-                     SciSolve <span className="le-brand-sub">Studio</span>
-                  </span>
-               </Link>
-               <span className="le-brand-divider">|</span>
-
-               {/* Breadcrumb Hierarchy */}
-               <nav className="le-breadcrumb-nav">
-                  <Link to={lesson?.topicSlug ? `/topic-manager/${lesson.topicSlug}` : '/topic-manager'}>
-                     {lesson?.topicTitle || 'Chuyên đề'}
-                  </Link>
-                  <span className="le-crumb-sep">&gt;</span>
-                  <span>{lesson?.chapterTitle || 'Chương học'}</span>
-                  <span className="le-crumb-sep">&gt;</span>
-                  <span className="le-crumb-current">{lesson?.title || 'Bài học'}</span>
-               </nav>
-            </div>
-
-            {/* Actions: Save & Publish */}
-            <div className="le-header-actions">
-               {lastSavedTime && (
-                  <span className="le-auto-saved">
-                     Đã lưu: {lastSavedTime}
-                  </span>
-               )}
-               <button type="button" onClick={() => navigate(-1)} className="le-btn-back">
-                  Quay lại
-               </button>
-               <button
-                  type="button"
-                  onClick={handleSaveLesson}
-                  disabled={saving}
-                  className="le-btn-publish"
-               >
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
-                     {saving ? 'hourglass_empty' : 'publish'}
-                  </span>
-                  <span>{saving ? 'Đang lưu...' : 'Xuất bản bài học'}</span>
-               </button>
-            </div>
-         </header>
-
          {/* ================= MAIN WORKSPACE ================= */}
          <main className="le-main-container">
 
@@ -372,7 +320,7 @@ export default function LessonEditor() {
                <div className="le-meta-grid">
                   <div className="le-field-group">
                      <label>
-                        Tiêu đề Bài học (<code>Lesson.title</code>) <span className="req">*</span>
+                        Tiêu đề bài học <span className="req">*</span>
                      </label>
                      <input
                         type="text"
@@ -380,23 +328,6 @@ export default function LessonEditor() {
                         onChange={(e) => setLesson((prev) => ({ ...prev, title: e.target.value }))}
                         placeholder="Ví dụ: Cân bằng lực ma sát và Phản lực pháp tuyến..."
                      />
-                  </div>
-
-                  <div className="le-field-group">
-                     <label>
-                        Thuộc Chương (<code>Chapter</code>)
-                     </label>
-                     <select
-                        value={lesson?.chapterId || ''}
-                        onChange={(e) => setLesson((prev) => ({ ...prev, chapterId: e.target.value }))}
-                     >
-                        <option value="">-- Chọn chương --</option>
-                        {chapters.map((chap) => (
-                           <option key={chap._id} value={chap._id}>
-                              {chap.name}
-                           </option>
-                        ))}
-                     </select>
                   </div>
 
                   <div className="le-status-toggle-wrap">
@@ -425,7 +356,7 @@ export default function LessonEditor() {
                            <span className="section-badge">
                               Phần {activeSectionIdx + 1} / {sections.length}
                            </span>
-                           <h2 className="section-card-title">Cấu hình nội dung phần này</h2>
+                           <h2 className="section-card-title">Nội dung</h2>
                         </div>
 
                         {/* Switch Type Buttons */}
@@ -435,14 +366,14 @@ export default function LessonEditor() {
                               onClick={() => handleSwitchSectionType('exercise')}
                               className={`btn-type ${currentSection?.type === 'exercise' ? 'active' : ''}`}
                            >
-                              ❓ Bài tập (exercise)
+                              Bài tập
                            </button>
                            <button
                               type="button"
                               onClick={() => handleSwitchSectionType('doc')}
                               className={`btn-type ${currentSection?.type === 'doc' ? 'active' : ''}`}
                            >
-                              📄 Lí thuyết (doc)
+                              Lí thuyết
                            </button>
                         </div>
                      </div>
@@ -466,7 +397,6 @@ export default function LessonEditor() {
                            type="text"
                            value={currentSection?.title || ''}
                            onChange={(e) => updateCurrentSection({ title: e.target.value })}
-                           placeholder="Ví dụ: I. Lí thuyết Nguyên lí I hoặc Câu hỏi trắc nghiệm..."
                         />
                      </div>
 
@@ -623,7 +553,6 @@ export default function LessonEditor() {
                         </div>
                      )}
 
-                     {/* ── FORM LÍ THUYẾT (DOC BUILDER) ── */}
                      {currentSection?.type === 'doc' && (
                         <div className="le-doc-form">
                            <div className="doc-toolbar">
@@ -645,7 +574,7 @@ export default function LessonEditor() {
                                  </button>
                                  <button
                                     type="button"
-                                    onClick={() => insertDocSnippet('$$\\Delta U = A + Q$$')}
+                                    onClick={() => insertDocSnippet('$$ $$')}
                                     className="tool-latex"
                                     title="Chèn công thức LaTeX khối"
                                  >
@@ -655,7 +584,6 @@ export default function LessonEditor() {
                            </div>
                            <textarea
                               rows={12}
-                              placeholder="# Nhập nội dung lí thuyết...&#10;Hỗ trợ LaTeX inline: $v = v_0 + at$ hoặc display math:&#10;$$\Delta U = A + Q$$"
                               value={currentSection?.docContent?.body || ''}
                               onChange={(e) => updateCurrentSection({
                                  docContent: { format: 'markdown', body: e.target.value },
@@ -672,11 +600,8 @@ export default function LessonEditor() {
                      <div className="preview-header-bar">
                         <div className="ph-left">
                            <span className="live-dot"></span>
-                           <span className="ph-title">Xem trước thực tế (Học viên)</span>
+                           <span className="ph-title">Xem trước</span>
                         </div>
-                        <span className="ph-type">
-                           {currentSection?.type === 'doc' ? '📄 Lí thuyết' : '❓ Bài tập'}
-                        </span>
                      </div>
 
                      <div className="preview-body">

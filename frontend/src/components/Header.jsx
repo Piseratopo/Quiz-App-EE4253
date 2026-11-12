@@ -51,7 +51,7 @@ function Header() {
          {/* Top Navigation Bar */}
          <div className="header-container">
             <div className="header-main-nav">
-               <Link to="/" className="flex items-center gap-2 shrink-0">
+               <Link to="/" className="header-brand-link">
                   <img
                      alt="Scienca Solvo Logo"
                      className="header-logo"
@@ -91,7 +91,7 @@ function Header() {
                </nav>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="header-action-group">
                {isAuthenticated && (
                   <div className="profile-container" ref={dropdownRef}>
                      <button

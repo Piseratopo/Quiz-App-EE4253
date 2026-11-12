@@ -20,6 +20,14 @@ header {
       gap: 4rem;
    }
 
+   .header-brand-link,
+   .header-action-group {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 0.5rem;
+   }
+
    img.header-logo {
       height: 40px;
       width: auto;

@@ -5,11 +5,11 @@ import MultipleChoiceQuestion from './questions/MultipleChoiceQuestion';
 
 function SearchBar({ search, setPage, setSearch }) {
    return (
-      <div className="mt-2 flex items-center border border-black/20 rounded-md">
+      <div className="profile-search">
          <input
             type="text"
             placeholder="Tìm kiếm câu hỏi..."
-            className="w-full p-2 bg-transparent outline-none"
+            className="profile-input"
             value={search}
             onChange={(e) => {
                setSearch(e.target.value);
@@ -102,28 +102,26 @@ function Profile() {
       handleGetUserQuestions(id, page, search, setUserQuestions);
    }, [user, page, search]);
 
-   const fieldsetStyle =
-      'pb-2 px-2 mb-2 rounded-md border border-1 border-primary';
-   const updateButtonStyle = 'common-btn-nav mb-4';
+   const updateButtonStyle = 'common-btn-nav profile-submit';
 
    return (
       <div>
          <h2 className="page-title">Profile</h2>
          <form>
-            <h3 className="text-xl font-bold my-4">Profile Description</h3>
-            <fieldset className={fieldsetStyle}>
-               <legend className="px-1">Username</legend>
+            <h3 className="profile-section-title">Profile Description</h3>
+            <fieldset className="profile-fieldset">
+               <legend>Username</legend>
                <input
                   type="text"
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-transparent outline-none"
+                  className="profile-input"
                />
             </fieldset>
             <button
                type="submit"
-               className={`${updateButtonStyle} ${username === user ? 'opacity-50' : ''}`}
+               className={updateButtonStyle}
                disabled={username === user}
                onClick={(e) => {
                   e.preventDefault();
@@ -140,35 +138,35 @@ function Profile() {
             >
                Update username
             </button>
-            <div className="grid grid-cols-3 gap-4">
-               <fieldset className={`${fieldsetStyle} col-span-1}`}>
-                  <legend className="px-1">Old Password</legend>
+            <div className="profile-password-grid">
+               <fieldset className="profile-fieldset">
+                  <legend>Old Password</legend>
                   <input
                      type="password"
-                     className="w-full bg-transparent outline-none"
+                     className="profile-input"
                      onChange={(e) => setOldPassword(e.target.value)}
                   />
                </fieldset>
-               <fieldset className={`${fieldsetStyle} col-span-1`}>
-                  <legend className="px-1">New Password</legend>
+               <fieldset className="profile-fieldset">
+                  <legend>New Password</legend>
                   <input
                      type="password"
-                     className="w-full bg-transparent outline-none"
+                     className="profile-input"
                      onChange={(e) => setNewPassword(e.target.value)}
                   />
                </fieldset>
-               <fieldset className={`${fieldsetStyle} col-span-1`}>
-                  <legend className="px-1">Repeat Password</legend>
+               <fieldset className="profile-fieldset">
+                  <legend>Repeat Password</legend>
                   <input
                      type="password"
-                     className="w-full bg-transparent outline-none"
+                     className="profile-input"
                      onChange={(e) => setRepeatPassword(e.target.value)}
                   />
                </fieldset>
             </div>
             <button
                type="submit"
-               className={`${updateButtonStyle} ${newPassword !== repeatPassword || newPassword.length < 8 ? 'opacity-50' : ''}`}
+               className={updateButtonStyle}
                disabled={
                   newPassword !== repeatPassword || newPassword.length < 8
                }
@@ -194,10 +192,10 @@ function Profile() {
                Update password
             </button>
             <p>{confirmation}</p>
-            <p className="text-wrong">{error}</p>
+            <p className="profile-error">{error}</p>
          </form>
          <div>
-            <h3 className="text-xl font-bold my-4">Your Questions</h3>
+            <h3 className="profile-section-title">Your Questions</h3>
             <SearchBar
                search={search}
                setPage={setPage}

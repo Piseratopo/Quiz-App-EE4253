@@ -1,15 +1,15 @@
 function QuestionDisplay({ answerArray, correctAnswer, question }) {
    return (
-      <section className="col-span-2 border-4 border-primary h-full grid grid-rows-2">
-         <div className="row-span-1 p-4 bg-primary text-background flex justify-center items-center">
+      <section className="question-preview">
+         <div className="question-preview-header">
             <p
-               className={`text-4xl text-center ${question ? '' : 'opacity-50'}`}
+               className={`question-preview-title ${question ? '' : 'is-empty'}`}
             >
                {question ? question : 'Type your question in the left panel.'}
             </p>
          </div>
          <div
-            className="row-span-1 p-4 grid gap-4"
+            className="question-preview-answers"
             style={{
                gridTemplateColumns: `repeat(${answerArray.length}, 1fr)`,
             }}
@@ -17,7 +17,7 @@ function QuestionDisplay({ answerArray, correctAnswer, question }) {
             {answerArray.map((answer, i) => (
                <div
                   key={i}
-                  className="p-2 h-full border-4 border-primary text-center flex justify-center items-center overflow-auto"
+                  className="question-preview-answer"
                   style={{ wordBreak: 'break-word' }}
                >
                   <span
