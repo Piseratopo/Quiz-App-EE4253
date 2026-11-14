@@ -8,6 +8,7 @@ import TopicView from './TopicView';
 import TopicManager from './TopicManager';
 import ChapterManager from './ChapterManager';
 import LessonEditor from './LessonEditor';
+import LessonView from './LessonView';
 import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
@@ -20,6 +21,8 @@ function Quiz() {
       { path: '/home', element: <Home /> },
       { path: '/topics', element: <Topics /> },
       { path: '/topics/:slug', element: <TopicView /> },
+      { path: '/topics/:slug/lesson/:lessonId', element: <LessonView /> },
+      { path: '/lessons/:lessonId', element: <LessonView /> },
       { path: '/topic-manager', element: <TopicManager /> },
       { path: '/topic-manager/:slug', element: <ChapterManager /> },
       { path: '/topic-manager/:slug/lesson/:lessonId', element: <LessonEditor /> },

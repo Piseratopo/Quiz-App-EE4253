@@ -43,7 +43,7 @@ function Header() {
       const isActive =
          location.pathname === path ||
          (path === '/topics' && location.pathname.startsWith('/topics') && location.pathname !== '/topic-manager');
-      return `common-btn-nav ${isActive ? 'active' : ''}`.trim();
+      return `btn-common-nav ${isActive ? 'active' : ''}`.trim();
    };
 
    return (

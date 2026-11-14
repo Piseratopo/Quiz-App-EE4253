@@ -649,6 +649,22 @@ app.get('/api/lessons/:lessonId', async (req, res, next) => {
       const lesson = await db.collection('lessons').findOne({ _id: lessonId });
       if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
 
+      let chapter = null;
+      let topic = null;
+      let chapterLessons = [];
+      if (lesson.chapterId) {
+         chapter = await db.collection('chapters').findOne({ _id: lesson.chapterId });
+         if (chapter) {
+            chapterLessons = await db.collection('lessons')
+               .find({ chapterId: chapter._id }, { projection: { sections: 0 } })
+               .sort({ order: 1 })
+               .toArray();
+            if (chapter.topicId) {
+               topic = await db.collection('topics').findOne({ _id: chapter.topicId });
+            }
+         }
+      }
+
       // Strip solutions from exercises before returning to client
       const sanitizedSections = (lesson.sections || []).map((sec) => {
          if (sec.type === 'exercise' && sec.exercise) {
@@ -658,7 +674,15 @@ app.get('/api/lessons/:lessonId', async (req, res, next) => {
          return sec;
       });
 
-      return res.json({ ...lesson, sections: sanitizedSections });
+      return res.json({
+         ...lesson,
+         sections: sanitizedSections,
+         chapterTitle: chapter?.name || '',
+         chapterOrder: chapter?.order || 1,
+         chapterLessons: chapterLessons || [],
+         topicTitle: topic?.title || '',
+         topicSlug: topic?.slug || '',
+      });
    } catch (error) { next(error); }
 });
 
@@ -707,8 +731,7 @@ app.post('/api/lessons/:lessonId/exercises/:sectionIndex/submit', requireToken, 
 
       return res.json({
          isCorrect,
-         explanation: explanation || '',
-         solution: solution || null,
+         ...(isCorrect && { explanation: explanation || '' }),
       });
    } catch (error) { next(error); }
 });

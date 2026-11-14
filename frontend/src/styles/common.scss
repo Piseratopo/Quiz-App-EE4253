@@ -8,12 +8,16 @@
    --page-bg-color: #fafafa;
 }
 
-.common-btn-nav {
+button {
+   border: none;
+}
+
+%btn-base {
    padding: 0.25rem 0.75rem;
    background-color: #ffffff;
    color: var(--color-text);
-   font-size: 0.875rem;
    font-weight: 700;
+   font-size: 0.875rem;
    border-radius: 0.25rem;
    transition: background-color 0.2s ease, color 0.2s ease;
    border: none;
@@ -22,28 +26,36 @@
    align-items: center;
    justify-content: center;
    text-decoration: none;
-   
-   // Required for positioning the animated bottom border
    position: relative;
    overflow: hidden;
 
-   // Animated bottom border pseudo-element
-   &::after {
+   &:hover {
+      background-color: rgba(214, 8, 8, 0.2);
+      color: var(--primary-color);
+   }
+}
+
+.btn-common {
+   @extend %btn-base;
+}
+
+.btn-common-nav {
+   @extend %btn-base;
+      &::after {
       content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       width: 0;
-      height: 2px; // Thickness of the bottom border
+      height: 1px;
       background-color: var(--primary-color);
       transition: width 0.3s ease;
    }
 
    &:hover {
-      // Primary color with 0.8 opacity (using SCSS rgba or CSS color-mix/hex notation)
-      background-color: rgba(214, 8, 8, 0.2); // Equivalent to --primary-color at 0.8 alpha
+      background-color: rgba(214, 8, 8, 0.2);
       color: var(--primary-color);
-      // Triggers the bottom border animation
+      
       &::after {
          width: 100%;
       }
@@ -64,8 +76,72 @@
    }
 }
 
+.btn-action-primary {
+   @extend %btn-base;
+   gap: 0.4rem;
+   padding: 0.5rem 1.2rem;
+   border-radius: 0.5rem;
+   
+   border: 1px solid #000000;
+   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+   &:hover,
+   &.active {
+      border-color: var(--primary-color);
+   }
+}
+
+.btn-action-secondary {
+   @extend %btn-base;
+   gap: 0.4rem;
+   padding: 0.5rem 1.2rem;
+   border-radius: 0.5rem;
+   
+   border: 1px solid rgba(0, 0, 0, 0.12);
+   background-color: var(--page-bg-color);
+   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+   // display: inline-flex;
+   // align-items: center;
+   // gap: 0.4rem;
+   // padding: 0.6rem 1.1rem;
+   // border-radius: 0.5rem;
+   
+   // border: 1px solid ;
+   // color: var(--color-text);
+   // font-weight: 700;
+   // font-size: 0.875rem;
+   // cursor: pointer;
+   // white-space: nowrap;
+   // transition: all 0.15s ease;
+
+   &:hover {
+      background-color: var(--primary-color);
+      color: white;
+   }
+}
+
+.btn-edit-details {
+   @extend %btn-base;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.25rem;
+   border: 1px solid #000000;
+   font-size: 0.75rem;
+   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+   &:hover,
+   &.active {
+      border-color: var(--primary-color);
+   }
+
+}
+
 .mjx-container {
   font-size: 1.1em;
+}
+
+.icon {
+   font-size: 1rem;
 }
 
 .page {
@@ -77,6 +153,10 @@
       padding: 2.5rem 1.5rem;
    }
 }
+
+
+
+
 
 .text-primary {
   color: var(--primary-color);
@@ -456,6 +536,11 @@
 .markdown-latex-content {
   line-height: 1.7;
   color: var(--color-text);
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;

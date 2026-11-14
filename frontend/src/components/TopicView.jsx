@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../configs/apiClient';
-import LatexMarkdown from './common/LatexMarkdown';
 import '../styles/Topics.scss';
 
 export default function TopicView() {
@@ -12,13 +11,6 @@ export default function TopicView() {
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState('');
    const [expandedChapters, setExpandedChapters] = useState({});
-
-   // Lesson Viewer Modal State
-   const [activeLesson, setActiveLesson] = useState(null);
-   const [loadingLesson, setLoadingLesson] = useState(false);
-   const [userAnswers, setUserAnswers] = useState({});
-   const [exerciseResults, setExerciseResults] = useState({});
-   const [submittingSection, setSubmittingSection] = useState(null);
 
    useEffect(() => {
       if (slug) {
@@ -50,58 +42,30 @@ export default function TopicView() {
       }));
    };
 
-   // Mở bài học
-   const handleOpenLesson = async (lessonId) => {
-      setLoadingLesson(true);
-      setUserAnswers({});
-      setExerciseResults({});
-      try {
-         const response = await apiClient.get(`/lessons/${lessonId}`);
-         setActiveLesson(response.data);
-      } catch (err) {
-         alert(err.response?.data?.error || 'Không thể tải nội dung bài học.');
-      } finally {
-         setLoadingLesson(false);
-      }
-   };
-
-   // Nộp bài tập
-   const handleSubmitExercise = async (sectionIndex) => {
-      if (!activeLesson) return;
-      const answer = userAnswers[sectionIndex];
-      if (answer === undefined || answer === '') {
-         alert('Vui lòng chọn hoặc nhập câu trả lời trước khi nộp bài.');
-         return;
-      }
-
-      setSubmittingSection(sectionIndex);
-      try {
-         const response = await apiClient.post(
-            `/lessons/${activeLesson._id}/exercises/${sectionIndex}/submit`,
-            { answer }
-         );
-         setExerciseResults((prev) => ({
-            ...prev,
-            [sectionIndex]: response.data,
-         }));
-      } catch (err) {
-         alert(err.response?.data?.error || 'Không thể gửi câu trả lời. Bạn đã đăng nhập chưa?');
-      } finally {
-         setSubmittingSection(null);
-      }
-   };
-
    return (
       <div className="scisolve-catalog-page">
+         <section className="catalog-hero-section">
+            <div className="catalog-hero-container">
+               <div>
+                  <h1 className="catalog-hero-title">
+                     {loading ? 'Đang tải...' : (topic?.title || 'Chi tiết chủ đề')}
+                  </h1>
+                  {topic?.description && (
+                     <p className="catalog-hero-desc" style={{ marginTop: '0.35rem' }}>
+                        {topic.description}
+                     </p>
+                  )}
+               </div>
+               <button className="back-btn" onClick={() => navigate('/topics')}>
+                  <span className="material-symbols-outlined">arrow_back</span>
+                  <span>Danh mục chủ đề</span>
+               </button>
+            </div>
+         </section>
+
+         {/* Main Content Area */}
          <div className="catalog-main-container">
             <div className="topic-detail-view">
-               <div className="topic-detail-bar">
-                  <button className="back-btn" onClick={() => navigate('/topics')}>
-                     <span className="material-symbols-outlined">arrow_back</span>
-                     Danh mục chủ đề
-                  </button>
-                  {topic && <h2 className="topic-detail-title">{topic.title}</h2>}
-               </div>
 
                {loading ? (
                   <div className="catalog-loading-state">
@@ -140,7 +104,9 @@ export default function TopicView() {
                                        <span className="chapter-tag">Chương {chapter.order || 1}</span>
                                        {chapter.name}
                                     </h3>
-                                    <p className="chapter-desc">{chapter.description}</p>
+                                    {chapter.description && (
+                                       <p className="chapter-desc">{chapter.description}</p>
+                                    )}
                                  </div>
                                  <span className={`material-symbols-outlined toggle-icon ${isOpen ? 'open' : ''}`}>
                                     expand_more
@@ -150,7 +116,7 @@ export default function TopicView() {
                               {isOpen && (
                                  <div className="lessons-list">
                                     {chapter.lessons?.length === 0 ? (
-                                       <p style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.4)', margin: '0.5rem 0' }}>
+                                       <p style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.4)', margin: '0.5rem 0' }} >
                                           Chưa có bài học nào trong chương này.
                                        </p>
                                     ) : (
@@ -158,11 +124,13 @@ export default function TopicView() {
                                           <div
                                              key={lesson._id}
                                              className="lesson-item"
-                                             onClick={() => handleOpenLesson(lesson._id)}
+                                             onClick={() => navigate(`/topics/${slug}/lesson/${lesson._id}`)}
                                           >
                                              <div className="lesson-info">
                                                 <h4 className="lesson-title">{lesson.title}</h4>
-                                                <p className="lesson-desc">{lesson.description}</p>
+                                                {lesson.description && (
+                                                   <p className="lesson-desc">{lesson.description}</p>
+                                                )}
                                              </div>
                                              <div className="lesson-action">
                                                 <span>Học bài</span>
@@ -181,122 +149,6 @@ export default function TopicView() {
                   </div>
                )}
             </div>
-
-            {/* Lesson Viewer Modal */}
-            {activeLesson && (
-               <div className="lesson-viewer-modal" onClick={() => setActiveLesson(null)}>
-                  <div className="lesson-viewer-card" onClick={(e) => e.stopPropagation()}>
-                     <div className="lesson-viewer-header">
-                        <h3 className="viewer-title">{activeLesson.title}</h3>
-                        <button className="close-btn" onClick={() => setActiveLesson(null)}>
-                           &times;
-                        </button>
-                     </div>
-
-                     <div className="lesson-viewer-body">
-                        {activeLesson.sections?.map((section, idx) => (
-                           <div
-                              key={idx}
-                              className={`section-card ${
-                                 section.type === 'doc' ? 'section-card--doc' : 'section-card--exercise'
-                              }`}
-                           >
-                              <span className={`section-badge ${section.type === 'doc' ? 'doc-badge' : 'ex-badge'}`}>
-                                 {section.type === 'doc' ? 'Lí thuyết' : `Bài tập (${section.exercise?.type})`}
-                              </span>
-                              <h4 className="section-title">{section.title}</h4>
-
-                              {/* Render Section Lí thuyết */}
-                              {section.type === 'doc' && section.docContent && (
-                                 <LatexMarkdown content={section.docContent.body} />
-                              )}
-
-                              {/* Render Section Bài Tập Đa Hình */}
-                              {section.type === 'exercise' && section.exercise && (
-                                 <div className="exercise-interactive">
-                                    <LatexMarkdown content={section.exercise.question} />
-
-                                    {/* Dạng 1: Trắc nghiệm 1 đáp án (mcq_single) */}
-                                    {section.exercise.type === 'mcq_single' && (
-                                       <div className="mcq-options-group" style={{ marginTop: '1rem' }}>
-                                          {section.exercise.payload?.options?.map((opt) => (
-                                             <label key={opt.id} className="mcq-option-label">
-                                                <input
-                                                   type="radio"
-                                                   name={`exercise_${idx}`}
-                                                   value={opt.id}
-                                                   checked={userAnswers[idx] === opt.id}
-                                                   onChange={(e) =>
-                                                      setUserAnswers({ ...userAnswers, [idx]: e.target.value })
-                                                   }
-                                                />
-                                                <LatexMarkdown content={opt.label} />
-                                             </label>
-                                          ))}
-                                       </div>
-                                    )}
-
-                                    {/* Dạng 2: Điền số/chữ (fill_blank) */}
-                                    {section.exercise.type === 'fill_blank' && (
-                                       <div className="fill-blank-group" style={{ marginTop: '1rem' }}>
-                                          <input
-                                             type="text"
-                                             placeholder={section.exercise.payload?.placeholder || 'Nhập câu trả lời...'}
-                                             value={userAnswers[idx] || ''}
-                                             onChange={(e) =>
-                                                setUserAnswers({ ...userAnswers, [idx]: e.target.value })
-                                             }
-                                          />
-                                          {section.exercise.payload?.unit && (
-                                             <span className="unit-text">{section.exercise.payload.unit}</span>
-                                          )}
-                                       </div>
-                                    )}
-
-                                    {/* Nút nộp bài tập */}
-                                    <button
-                                       onClick={() => handleSubmitExercise(idx)}
-                                       className="btn-common"
-                                       disabled={submittingSection === idx}
-                                       style={{ marginTop: '0.5rem' }}
-                                    >
-                                       {submittingSection === idx ? 'Đang chấm điểm...' : 'Nộp câu trả lời'}
-                                    </button>
-
-                                    {/* Kết quả sau khi nộp */}
-                                    {exerciseResults[idx] && (
-                                       <div
-                                          className={`result-alert ${
-                                             exerciseResults[idx].isCorrect ? 'correct' : 'incorrect'
-                                          }`}
-                                       >
-                                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                             <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
-                                                {exerciseResults[idx].isCorrect ? 'check_circle' : 'cancel'}
-                                             </span>
-                                             {exerciseResults[idx].isCorrect
-                                                ? 'Chính xác! Bạn đã làm rất tốt.'
-                                                : 'Chưa chính xác. Hãy xem lại lời giải chi tiết bên dưới.'}
-                                          </div>
-
-                                          {exerciseResults[idx].explanation && (
-                                             <div className="explanation-box">
-                                                <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
-                                                   Lời giải chi tiết:
-                                                </strong>
-                                                <LatexMarkdown content={exerciseResults[idx].explanation} />
-                                             </div>
-                                          )}
-                                       </div>
-                                    )}
-                                 </div>
-                              )}
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-               </div>
-            )}
          </div>
       </div>
    );

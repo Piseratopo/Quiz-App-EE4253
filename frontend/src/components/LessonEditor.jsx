@@ -42,12 +42,10 @@ export default function LessonEditor() {
                      ? lessonData.sections
                      : [
                         {
-                           title: 'I. Lí thuyết trọng tâm',
                            order: 1,
                            type: 'doc',
                            docContent: {
                               format: 'markdown',
-                              body: '### Lí thuyết bài học\nNhập nội dung lí thuyết và công thức toán học/vật lí tại đây: $E = mc^2$',
                            },
                         },
                      ];
@@ -89,7 +87,7 @@ export default function LessonEditor() {
             type: 'doc',
             docContent: currentSection.docContent || {
                format: 'markdown',
-               body: '### Nội dung lí thuyết\nNhập nội dung hỗ trợ công thức LaTeX: $\\Delta U = A + Q$',
+               body: '',
             },
          });
       } else {
@@ -98,17 +96,15 @@ export default function LessonEditor() {
             exercise: currentSection.exercise || {
                type: 'mcq_single',
                points: 100,
-               question: 'Câu hỏi kiểm tra kiến thức: ',
+               question: '',
                payload: {
                   options: [
-                     { id: 'opt_1', label: 'Lựa chọn A', isCorrect: true },
-                     { id: 'opt_2', label: 'Lựa chọn B', isCorrect: false },
-                     { id: 'opt_3', label: 'Lựa chọn C', isCorrect: false },
-                     { id: 'opt_4', label: 'Lựa chọn D', isCorrect: false },
+                     { id: 'opt_1', label: '', isCorrect: false },
+                     { id: 'opt_2', label: '', isCorrect: false },
                   ],
                },
-               solution: { correctAnswer: 'opt_1' },
-               explanation: 'Giải thích chi tiết cho phương án đúng.',
+               solution: { correctAnswer: '' },
+               explanation: '',
             },
          });
       }
@@ -120,17 +116,19 @@ export default function LessonEditor() {
       const newEx = { ...ex, type: eType };
 
       if (eType === 'mcq_single' || eType === 'mcq_multiple') {
-         if (!newEx.payload?.options || newEx.payload.options.length === 0) {
-            newEx.payload = {
-               options: [
-                  { id: 'opt_1', label: 'Lựa chọn 1', isCorrect: true },
-                  { id: 'opt_2', label: 'Lựa chọn 2', isCorrect: false },
-               ],
-            };
-            newEx.solution = { correctAnswer: 'opt_1' };
-         }
+         const options = newEx.payload?.options?.length
+            ? newEx.payload.options
+            : [
+               { id: 'opt_1', label: '', isCorrect: false },
+               { id: 'opt_2', label: '', isCorrect: false },
+            ];
+         newEx.payload = { ...newEx.payload, options };
+         newEx.solution = eType === 'mcq_multiple'
+            ? { correctAnswers: options.filter((option) => option.isCorrect).map((option) => option.id) }
+            : { correctAnswer: options.find((option) => option.isCorrect)?.id || '' };
       } else if (eType === 'fill_blank') {
-         newEx.solution = newEx.solution || { exactValue: '', tolerance: 0.1 };
+         newEx.payload = { placeholder: '' };
+         newEx.solution = { exactValue: '', tolerance: '' };
       }
 
       updateCurrentSection({ exercise: newEx });
@@ -140,7 +138,7 @@ export default function LessonEditor() {
       const ex = currentSection?.exercise || {};
       const opts = [...(ex.payload?.options || [])];
       const newId = `opt_${Date.now()}`;
-      opts.push({ id: newId, label: `Lựa chọn ${opts.length + 1}`, isCorrect: false });
+      opts.push({ id: newId, label: '', isCorrect: false });
       updateCurrentSection({
          exercise: {
             ...ex,
@@ -195,29 +193,29 @@ export default function LessonEditor() {
    // ── Add / Remove Section ──────────────────────────────────────────────────
    const handleAddNewSection = (type = 'doc') => {
       const newSec = {
-         title: type === 'doc' ? `Phần ${sections.length + 1}: Lí thuyết mới` : `Phần ${sections.length + 1}: Bài tập mới`,
+         title: '',
          order: sections.length + 1,
          type,
          ...(type === 'doc'
             ? {
                docContent: {
                   format: 'markdown',
-                  body: '### Tiêu đề lí thuyết\nNội dung văn bản và công thức LaTeX...',
+                  body: '',
                },
             }
             : {
                exercise: {
                   type: 'mcq_single',
                   points: 100,
-                  question: 'Nội dung câu hỏi trắc nghiệm...',
+                  question: '',
                   payload: {
                      options: [
-                        { id: 'opt_1', label: 'Đáp án A', isCorrect: true },
-                        { id: 'opt_2', label: 'Đáp án B', isCorrect: false },
+                        { id: 'opt_1', label: '', isCorrect: false },
+                        { id: 'opt_2', label: '', isCorrect: false },
                      ],
                   },
-                  solution: { correctAnswer: 'opt_1' },
-                  explanation: 'Lời giải chi tiết...',
+                  solution: { correctAnswer: '' },
+                  explanation: '',
                },
             }),
       };
@@ -301,8 +299,8 @@ export default function LessonEditor() {
       <div className="lesson-editor-page">
          {/* Toast Notification */}
          {toast && (
-            <div className={`app-toast toast-${toast.type}`} style={{ position: 'fixed', top: '1rem', right: '1.5rem', zIndex: 9999 }}>
-               <span className="material-symbols-outlined">
+            <div className={`app-toast ${toast.type}`}>
+               <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
                   {toast.type === 'error' ? 'error' : 'check_circle'}
                </span>
                <span>{toast.message}</span>
@@ -364,64 +362,67 @@ export default function LessonEditor() {
                         </div>
                      </div>
 
-                     {/* Tiêu đề Section */}
-                     <div className="le-section-title-field">
-                        <div className="field-top">
-                           <label>Tiêu đề phần</label>
-                           {sections.length > 1 && (
-                              <button
-                                 type="button"
-                                 onClick={() => handleDeleteSection(activeSectionIdx)}
-                                 className="btn-del-section"
-                              >
-                                 <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>delete</span>
-                                 Xóa phần này
-                              </button>
-                           )}
+                     {/* Hàng: Tiêu đề phần & Dạng bài tập */}
+                     <div className={`le-section-title-row ${currentSection?.type === 'exercise' ? 'is-exercise' : ''}`}>
+                        <div className="le-field-col">
+                           <div className="field-top">
+                              <label>Tiêu đề phần</label>
+                              {sections.length > 1 && currentSection?.type !== 'exercise' && (
+                                 <button
+                                    type="button"
+                                    onClick={() => handleDeleteSection(activeSectionIdx)}
+                                    className="btn-del-section"
+                                 >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>delete</span>
+                                    Xóa phần này
+                                 </button>
+                              )}
+                           </div>
+                           <input
+                              type="text"
+                              value={currentSection?.title || ''}
+                              onChange={(e) => updateCurrentSection({ title: e.target.value })}
+                              placeholder="Tiêu đề phần..."
+                           />
                         </div>
-                        <input
-                           type="text"
-                           value={currentSection?.title || ''}
-                           onChange={(e) => updateCurrentSection({ title: e.target.value })}
-                        />
+
+                        {currentSection?.type === 'exercise' && (
+                           <div className="le-field-col">
+                              <div className="field-top">
+                                 <label>Dạng bài tập</label>
+                                 {sections.length > 1 && (
+                                    <button
+                                       type="button"
+                                       onClick={() => handleDeleteSection(activeSectionIdx)}
+                                       className="btn-del-section"
+                                    >
+                                       <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>delete</span>
+                                       Xóa phần này
+                                    </button>
+                                 )}
+                              </div>
+                              <select
+                                 value={currentSection?.exercise?.type || 'mcq_single'}
+                                 onChange={(e) => handleExerciseTypeChange(e.target.value)}
+                              >
+                                 <option value="mcq_single">Trắc nghiệm 1 đáp án (mcq_single)</option>
+                                 <option value="mcq_multiple">Trắc nghiệm nhiều đáp án (mcq_multiple)</option>
+                                 <option value="fill_blank">Điền số / kết quả (fill_blank)</option>
+                              </select>
+                           </div>
+                        )}
                      </div>
 
                      {/* ── FORM BÀI TẬP (EXERCISE BUILDER) ── */}
                      {currentSection?.type === 'exercise' && (
                         <div className="le-exercise-form">
-                           <div className="grid-dual">
-                              <div className="form-group">
-                                 <label>Dạng bài tập</label>
-                                 <select
-                                    value={currentSection?.exercise?.type || 'mcq_single'}
-                                    onChange={(e) => handleExerciseTypeChange(e.target.value)}
-                                 >
-                                    <option value="mcq_single">Trắc nghiệm 1 đáp án (mcq_single)</option>
-                                    <option value="mcq_multiple">Trắc nghiệm nhiều đáp án (mcq_multiple)</option>
-                                    <option value="fill_blank">Điền số / kết quả (fill_blank)</option>
-                                 </select>
-                              </div>
-
-                              <div className="form-group">
-                                 <label>
-                                    Điểm thưởng XP (<code>exercise.points</code>)
-                                 </label>
-                                 <input
-                                    type="number"
-                                    value={currentSection?.exercise?.points || 100}
-                                    onChange={(e) => updateCurrentSection({
-                                       exercise: { ...currentSection.exercise, points: Number(e.target.value) || 0 },
-                                    })}
-                                 />
-                              </div>
-                           </div>
 
                            {/* Đề bài */}
                            <div className="form-group">
-                              <label>Nội dung câu hỏi (Hỗ trợ công thức LaTeX: $v = v_0 + at$)</label>
+                              <label>Nội dung câu hỏi</label>
                               <textarea
                                  rows={3}
-                                 placeholder="Nhập nội dung đề bài. Hỗ trợ LaTeX: $\theta = 45^\circ$, $\mu_s = 0.40$..."
+                                 placeholder="Nhập nội dung đề bài"
                                  value={currentSection?.exercise?.question || ''}
                                  onChange={(e) => updateCurrentSection({
                                     exercise: { ...currentSection.exercise, question: e.target.value },
@@ -486,7 +487,7 @@ export default function LessonEditor() {
                               <div className="fill-blank-block">
                                  <div className="fb-field">
                                     <label>
-                                       Đáp số chuẩn (<code>solution.exactValue</code>)
+                                       Đáp số chuẩn
                                     </label>
                                     <input
                                        type="number"
@@ -496,7 +497,10 @@ export default function LessonEditor() {
                                        onChange={(e) => updateCurrentSection({
                                           exercise: {
                                              ...currentSection.exercise,
-                                             solution: { ...currentSection.exercise.solution, exactValue: Number(e.target.value) },
+                                             solution: {
+                                                ...currentSection.exercise.solution,
+                                                exactValue: e.target.value === '' ? '' : Number(e.target.value),
+                                             },
                                           },
                                        })}
                                     />
@@ -504,7 +508,7 @@ export default function LessonEditor() {
 
                                  <div className="fb-field">
                                     <label>
-                                       Sai số cho phép ± (<code>tolerance</code>)
+                                       Sai số cho phép
                                     </label>
                                     <input
                                        type="number"
@@ -514,7 +518,10 @@ export default function LessonEditor() {
                                        onChange={(e) => updateCurrentSection({
                                           exercise: {
                                              ...currentSection.exercise,
-                                             solution: { ...currentSection.exercise.solution, tolerance: Number(e.target.value) },
+                                             solution: {
+                                                ...currentSection.exercise.solution,
+                                                tolerance: e.target.value === '' ? '' : Number(e.target.value),
+                                             },
                                           },
                                        })}
                                     />
@@ -525,7 +532,7 @@ export default function LessonEditor() {
                            {/* Lời giải chi tiết */}
                            <div className="form-group" style={{ paddingTop: '0.5rem', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                               <label>
-                                 Lời giải chi tiết sau khi nộp (<code>exercise.explanation</code>)
+                                 Lời giải chi tiết sau khi nộp
                               </label>
                               <textarea
                                  rows={2}
@@ -635,7 +642,7 @@ export default function LessonEditor() {
                                     <input
                                        type="text"
                                        disabled
-                                       placeholder="Ô nhập đáp án của học sinh..."
+                                       placeholder="Ô nhập đáp án"
                                     />
                                     <span className="fb-hint">
                                        (Đáp số chuẩn: {currentSection?.exercise?.solution?.exactValue ?? '--'}, sai số ±{currentSection?.exercise?.solution?.tolerance ?? 0.1})

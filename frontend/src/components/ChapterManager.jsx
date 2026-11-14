@@ -504,14 +504,7 @@ export default function ChapterManager() {
                                  <div className="cm-lessons-wrap">
                                     {lessons.length === 0 ? (
                                        <div className="cm-empty-lessons">
-                                          Chưa có bài học nào trong chương này.{' '}
-                                          <button
-                                             className="btn-manage-lessons"
-                                             style={{ display: 'inline-flex', marginLeft: '0.5rem' }}
-                                             onClick={() => openAddLesson(chapter._id)}
-                                          >
-                                             Thêm bài học
-                                          </button>
+                                          Chưa có bài học nào trong chương này.
                                        </div>
                                     ) : (
                                        <table className="cm-lessons-table">
@@ -606,13 +599,6 @@ export default function ChapterManager() {
                                                                <span className="material-symbols-outlined icon">
                                                                   arrow_forward
                                                                </span>
-                                                            </button>
-                                                            <button
-                                                               className="btn-icon-lesson"
-                                                               title="Sửa tên bài"
-                                                               onClick={() => openEditLesson(lesson, chapter._id)}
-                                                            >
-                                                               <span className="material-symbols-outlined icon">edit</span>
                                                             </button>
                                                             <button
                                                                className="btn-icon-lesson btn-delete"

@@ -38,6 +38,32 @@
     justify-content: space-between;
     min-height: 2.75rem;
     box-sizing: border-box;
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text);
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+
+      .material-symbols-outlined {
+        font-size: 1.1rem;
+      }
+
+      &:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background-color: rgba(214, 8, 8, 0.04);
+      }
+    }
   }
 
   .catalog-hero-title {

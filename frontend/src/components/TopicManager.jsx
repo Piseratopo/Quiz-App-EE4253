@@ -427,17 +427,10 @@ export default function TopicManager() {
                                           </button>
                                           <button
                                              className="btn-icon-action"
-                                             title="Sửa chương & bài học"
-                                             onClick={() => navigate(`/topic-manager/${topic.slug}`)}
-                                          >
-                                             <span className="material-symbols-outlined icon">edit</span>
-                                          </button>
-                                          <button
-                                             className="btn-icon-action"
                                              title="Chỉnh sửa thông tin chuyên đề"
                                              onClick={() => openEditModal(topic)}
                                           >
-                                             <span className="material-symbols-outlined icon">settings</span>
+                                             <span className="material-symbols-outlined icon">edit</span>
                                           </button>
                                           <button className="btn-icon-action btn-delete" title="Xóa" onClick={() => setDeleteConfirmId(topic._id)}>
                                              <span className="material-symbols-outlined icon">delete</span>
@@ -535,7 +528,7 @@ export default function TopicManager() {
                         <div className="form-group">
                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' }}>
                               <input type="checkbox" style={{ width: 'auto' }} checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} />
-                              Hiển thị trên Cổng học viên ngay
+                              Hiển thị trên trang chủ đề
                            </label>
                         </div>
                      </div>

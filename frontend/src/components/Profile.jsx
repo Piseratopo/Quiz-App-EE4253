@@ -102,7 +102,7 @@ function Profile() {
       handleGetUserQuestions(id, page, search, setUserQuestions);
    }, [user, page, search]);
 
-   const updateButtonStyle = 'common-btn-nav profile-submit';
+   const updateButtonStyle = 'btn-common-nav profile-submit';
 
    return (
       <div>

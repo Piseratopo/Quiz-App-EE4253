@@ -7,7 +7,7 @@ export default function Home() {
          <p className="home-intro">
             Chào mừng bạn đến với Scienca Solvo!
          </p>
-         <Link to="/topics" className="common-btn-nav">
+         <Link to="/topics" className="btn-common-nav">
             Khám phá các chủ đề &rarr;
          </Link>
       </div>
